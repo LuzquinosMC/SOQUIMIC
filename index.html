@@ -3693,9 +3693,11 @@ async function confirmarCambioPass() {
     if (error) throw error;
 
     // Marcar primer_login = false en BD via RPC (case-insensitive)
-    await sb.rpc('marcar_primer_login_completado').catch(()=>{});
+    try {
+      await sb.rpc('marcar_primer_login_completado');
+    } catch(_) { /* ignorar si falla */ }
 
-    toast('[APROBADO] Contraseña cambiada correctamente','ok');
+    toast('Contraseña cambiada correctamente','ok');
     state.perfil.primer_login = false;
     await redirigirSegunRol(state.perfil);
   } catch(e) { errEl.textContent = 'Error: ' + e.message; }

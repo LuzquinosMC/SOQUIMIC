@@ -655,7 +655,7 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 .tab-body{padding:20px 24px;display:none;overflow-y:auto;background:transparent;}
 .tabs-wrap{padding:20px 24px 0;flex-shrink:0;}
 /* Screens principales oscuras para contraste */
-#screen-almacen,#screen-comercial{background:var(--bg)!important;}
+
 /* Scrollbar personalizado estilo CHRYSO */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:rgba(245,197,24,.05)}
@@ -760,46 +760,122 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 .user-dropdown-item.danger:hover{background:rgba(231,76,60,.1);color:#E74C3C}
 
 
-/* ─ Paneles sobre fondo amarillo ─ */
-.tab-body.active{
-  display:block;
-  background:transparent;
+/* ─ Paneles internos ─ */
+.tab-body.active{display:block;}
+.tbl-wrap{background:#1A1600;}
+.sol-auth-card{background:#1A1600;}
+
+
+/* ─ Dashboard sobre fondo amarillo CHRYSO ─ */
+
+/* Stats row: cards negras bien definidas */
+#screen-almacen .stats-row,
+#screen-comercial .stats-row,
+#screen-solicitante .stats-row {
+  padding: 20px 24px 0;
 }
-.tbl-wrap{
-  background:#1A1600;
+#screen-almacen .stat-card,
+#screen-comercial .stat-card,
+#screen-solicitante .stat-card {
+  background: #1A1600;
+  border: 1px solid rgba(245,197,24,.2);
+  box-shadow: 0 4px 16px rgba(0,0,0,.3);
 }
-/* Toolbar sobre amarillo: fondo blanco para los inputs de búsqueda */
-.toolbar .field-input{
-  background:#fff;
-  border:1px solid rgba(26,22,0,.15);
-  color:#1A1200;
+
+/* Tabs wrapper: fondo negro para que resalten */
+#screen-almacen .tabs-wrap,
+#screen-comercial .tabs-wrap {
+  background: #1A1600;
+  border-radius: 0;
+  padding: 0 24px;
+  border-bottom: 2px solid rgba(245,197,24,.25);
 }
-.toolbar .field-input::placeholder{color:#8A7830}
-.toolbar .field-input:focus{border-color:var(--chryso-dark);box-shadow:0 0 0 3px rgba(212,168,0,.2)}
-/* Select en toolbar */
-.toolbar select.field-input{
-  background:#fff;
-  color:#1A1200;
+#screen-almacen .tabs,
+#screen-comercial .tabs {
+  border-bottom: none;
+  background: #1A1600;
 }
-/* Toolbar blanco para stats-row area */
-.stats-row{
-  background:transparent;
+#screen-almacen .tab-btn,
+#screen-comercial .tab-btn {
+  color: rgba(245,197,24,.5);
+  padding: 14px 20px;
 }
-/* Stepper sobre amarillo */
-.stepper-wrap{
-  background:var(--bg);
+#screen-almacen .tab-btn:hover,
+#screen-comercial .tab-btn:hover {
+  color: var(--chryso);
+  background: rgba(245,197,24,.06);
 }
-.stepper{
-  background:#1A1600;
+#screen-almacen .tab-btn.active,
+#screen-comercial .tab-btn.active {
+  color: var(--chryso);
+  background: rgba(245,197,24,.05);
 }
-/* Form area sobre amarillo */
-.form-area,.confirm-body,.equipos-body{
-  background:var(--bg);
+#screen-almacen .tab-btn.active::after,
+#screen-comercial .tab-btn.active::after {
+  background: var(--chryso);
 }
-/* Sol cards sobre amarillo */
-.sol-auth-card{
-  background:#1A1600;
+
+/* Tab body: fondo blanco con margen, como tarjeta */
+#screen-almacen .tab-body.active,
+#screen-comercial .tab-body.active {
+  background: transparent;
+  padding: 16px 24px;
 }
+
+/* Toolbar sobre amarillo */
+#screen-almacen .toolbar,
+#screen-comercial .toolbar {
+  margin-bottom: 14px;
+}
+
+/* Tabla: fondo negro, bien visible */
+#screen-almacen .tbl-wrap,
+#screen-comercial .tbl-wrap {
+  background: #1A1600;
+  border: 1px solid rgba(245,197,24,.2);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,.25);
+}
+#screen-almacen table,
+#screen-comercial table {
+  background: #1A1600;
+}
+#screen-almacen thead tr,
+#screen-comercial thead tr {
+  background: #2D2800;
+}
+#screen-almacen td,
+#screen-comercial td {
+  color: #A09060;
+  border-bottom: 1px solid rgba(245,197,24,.06);
+}
+#screen-almacen tbody tr:hover td,
+#screen-comercial tbody tr:hover td {
+  background: rgba(245,197,24,.04);
+}
+
+/* Excel cards y form panels oscuros */
+#screen-almacen .excel-card,
+#screen-almacen .excel-grid .excel-card {
+  background: #1A1600;
+  border: 1px solid rgba(245,197,24,.15);
+  box-shadow: 0 4px 16px rgba(0,0,0,.25);
+}
+
+/* Flujo de aprobación box */
+#screen-almacen [style*="FLUJO DE APROBACIÓN"] {
+  background: #1A1600 !important;
+}
+
+/* Panel Comercial - stats y tabla */
+#screen-comercial > div[style*="padding:16px 24px"] {
+  background: transparent;
+}
+
+
+/* CRITICAL: asegurar visibilidad de tabs activos */
+.tab-body.active { display: block !important; }
 
 </style>
 </head>
@@ -2234,10 +2310,14 @@ async function loadClientes() {
     <td>${c.ciudad||'—'}</td><td>${c.contacto||'—'}</td><td>${c.telefono||'—'}</td></tr>`).join('');
 }
 
-function switchTab(tabId,btn) {
-  document.querySelectorAll('.tab-body').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
+function switchTab(tabId, btn) {
+  // Solo afectar tabs del mismo contenedor padre
+  const targetTab = document.getElementById(tabId);
+  if (!targetTab) return;
+  const parent = targetTab.closest('.screen') || document;
+  parent.querySelectorAll('.tab-body').forEach(t => t.classList.remove('active'));
+  parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  targetTab.classList.add('active');
   btn.classList.add('active');
   if(tabId==='tab-sol') loadSolicitudes();
   if(tabId==='tab-inv') loadInventario();

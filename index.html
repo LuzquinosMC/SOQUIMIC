@@ -953,6 +953,7 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+  position: relative;
 }
 .adm-sidebar-avatar {
   width: 34px; height: 34px;
@@ -1974,7 +1975,7 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
         <button class="adm-sidebar-chevron" onclick="toggleUserMenu('menu-almacen')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
-        <div class="user-dropdown" style="bottom:60px;top:auto">
+        <div class="user-dropdown" style="bottom:70px;top:auto;position:absolute;right:8px;left:8px;min-width:unset;width:auto">
           <div class="user-dropdown-header">
             <div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:4px">SESIÓN ACTIVA</div>
             <div class="user-dropdown-email" id="dash-email"></div>
@@ -5397,13 +5398,27 @@ function toggleUserMenu(menuId) {
   const isOpen = menu.classList.contains('open');
   menu.classList.toggle('open');
   if (!isOpen) {
-    const btn = menu.querySelector('.user-menu-btn,.adm-sidebar-chevron');
     const drop = menu.querySelector('.user-dropdown');
-    if (btn && drop) {
-      const rect = btn.getBoundingClientRect();
-      drop.style.top = (rect.bottom + 8) + 'px';
-      drop.style.right = (window.innerWidth - rect.right) + 'px';
-      drop.style.left = 'auto';
+    if (!drop) return;
+    // Sidebar menu: posición absoluta (no necesita cálculo)
+    if (menuId === 'menu-almacen' || menuId === 'menu-comercial' || menuId === 'menu-solicitante') {
+      drop.style.position = 'absolute';
+      drop.style.bottom = '56px';
+      drop.style.top = 'auto';
+      drop.style.left = '8px';
+      drop.style.right = '8px';
+      drop.style.minWidth = 'unset';
+    } else {
+      // Topbar menus: posición fija calculada
+      const btn = menu.querySelector('.user-menu-btn');
+      if (btn) {
+        const rect = btn.getBoundingClientRect();
+        drop.style.position = 'fixed';
+        drop.style.top = (rect.bottom + 8) + 'px';
+        drop.style.right = (window.innerWidth - rect.right) + 'px';
+        drop.style.left = 'auto';
+        drop.style.bottom = 'auto';
+      }
     }
   }
 }

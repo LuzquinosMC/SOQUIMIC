@@ -3356,8 +3356,8 @@ async function loadInventario() {
   const tbody=document.getElementById('inv-tbody');
   if(!rows.length){tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:32px">Sin equipos</td></tr>';return;}
   tbody.innerHTML=rows.map(i=>`<tr>
-    <td style="font-family:var(--fm);font-size:11px;color:var(--text-dim)">${i.categoria}</td>
-    <td style="color:var(--text);font-weight:500">${i.nombre}</td>
+    <td style="font-family:var(--fm);font-size:11px;color:#6A5A20;font-weight:500">${i.categoria}</td>
+    <td style="color:#1A1200;font-weight:600">${i.nombre}</td>
     <td><span style="font-family:var(--fm);color:var(--orange);font-weight:600">${i.stock}</span></td>
     <td><div class="actions-cell">
       <button class="btn-sm btn-sm-ghost" onclick="abrirEditarEquipo('${i.id}','${i.categoria.replace(/'/g,"\\'")}','${i.nombre.replace(/'/g,"\\'")}',${i.stock})">Editar</button>
@@ -3417,7 +3417,7 @@ async function loadClientes() {
   if(!rows.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:32px">Sin clientes</td></tr>';return;}
   tbody.innerHTML=rows.map(c=>`<tr>
     <td><span class="link-or">${c.codigo_sn}</span></td>
-    <td style="color:var(--text)">${c.nombre}</td>
+    <td style="color:#1A1200;font-weight:500">${c.nombre}</td>
     <td>${c.ciudad||'—'}</td><td>${c.contacto||'—'}</td><td>${c.telefono||'—'}</td></tr>`).join('');
 }
 
@@ -4592,8 +4592,8 @@ async function loadSolicitantes() {
     return;
   }
   tbody.innerHTML = rows.map(s => `<tr>
-    <td style="color:var(--text);font-weight:500">${s.nombre}</td>
-    <td style="font-family:var(--fm);font-size:11px;color:var(--chryso)">${s.email||'<span style="color:var(--text-dim)">Sin email</span>'}</td>
+    <td style="color:#1A1200;font-weight:600">${s.nombre}</td>
+    <td style="font-family:var(--fm);font-size:11px;color:#8A5F00">${s.email||'<span style="color:var(--text-dim)">Sin email</span>'}</td>
     <td style="font-family:var(--fm);font-size:12px">${s.dni||'—'}</td>
     <td style="font-family:var(--fm);font-size:12px">${s.licencia||'—'}</td>
     <td>${s.cargo||'—'}</td>

@@ -1424,18 +1424,62 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 }
 
 /* ─ RESPONSIVE ─ */
-@media(max-width:1200px) {
-  .adm-stats-row { grid-template-columns: repeat(2,1fr) 1fr; }
-  .adm-metrics-row { grid-template-columns: repeat(3,1fr); }
+
+
+/* ════════════════════════════════════════
+   RESPONSIVE — DASHBOARD ADMIN
+   Sistema de breakpoints completo
+════════════════════════════════════════ */
+
+/* ── Pantallas grandes (>1400px): todo en 1 fila ── */
+@media(min-width:1400px) {
+  .adm-stats-row { grid-template-columns: 1.4fr 1fr 1fr 1fr; }
+  .adm-kpi-row   { grid-template-columns: repeat(4,1fr); }
+  .adm-metrics-row { grid-template-columns: repeat(5,1fr); }
 }
-@media(max-width:768px) {
-  .adm-sidebar { width: 60px; }
-  .adm-nav-item span, .adm-nav-label, .adm-sidebar-name, .adm-sidebar-rol { display: none; }
-  .adm-sidebar-logo img { height: 36px; }
+
+/* ── Pantallas medianas-grandes (1100px–1400px) ── */
+@media(max-width:1400px) {
+  .adm-stats-row { grid-template-columns: 1.3fr 1fr 1fr 1fr; }
+  .adm-kpi-row   { grid-template-columns: repeat(4,1fr); }
+  .adm-metrics-row { grid-template-columns: repeat(5,1fr); }
+}
+
+/* ── Laptops estándar (900px–1100px) ── */
+@media(max-width:1100px) {
   .adm-stats-row { grid-template-columns: repeat(2,1fr); }
-  .adm-metrics-row { grid-template-columns: repeat(2,1fr); }
-  .adm-import-grid { grid-template-columns: 1fr; }
+  .adm-kpi-row   { grid-template-columns: repeat(3,1fr); }
+  .adm-metrics-row { grid-template-columns: repeat(3,1fr); }
+  .adm-stat-num  { font-size:28px; }
+  .adm-stat-card--primary .adm-stat-num { font-size:36px; }
 }
+
+/* ── Tablets (768px–900px) ── */
+@media(max-width:900px) {
+  .adm-sidebar { width:60px; }
+  .adm-nav-item span, .adm-nav-label,
+  .adm-sidebar-name, .adm-sidebar-rol { display:none; }
+  .adm-sidebar-logo img { height:36px; }
+  .adm-stats-row { grid-template-columns: repeat(2,1fr); }
+  .adm-kpi-row   { grid-template-columns: repeat(2,1fr); }
+  .adm-metrics-row { grid-template-columns: repeat(2,1fr); }
+  .adm-main      { max-width: calc(100vw - 60px); }
+}
+
+/* ── Móviles (<768px) ── */
+@media(max-width:768px) {
+  .adm-sidebar { width:56px; }
+  .adm-nav-item span, .adm-nav-label,
+  .adm-sidebar-name, .adm-sidebar-rol { display:none; }
+  .adm-stats-row   { grid-template-columns: 1fr 1fr; }
+  .adm-kpi-row     { grid-template-columns: 1fr 1fr; }
+  .adm-metrics-row { grid-template-columns: 1fr 1fr; }
+  .adm-import-grid { grid-template-columns: 1fr; }
+  .adm-content-scroll { padding: 10px 10px 0; }
+  .adm-topbar-search { max-width: 100%; }
+  .adm-greeting-title { font-size:18px; }
+}
+
 
 
 /* ══════════════════════════════════════
@@ -1765,12 +1809,8 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
   text-overflow: ellipsis;
 }
 
-@media(max-width:1300px) {
-  .adm-kpi-row { grid-template-columns: repeat(4,1fr); }
-}
-@media(max-width:900px) {
-  .adm-kpi-row { grid-template-columns: repeat(2,1fr); }
-}
+
+
 
 </style>
 </head>

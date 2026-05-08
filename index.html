@@ -1691,6 +1691,85 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
   color: #E74C3C;
 }
 
+
+/* ── Card principal (mayor tamaño) ── */
+.adm-stat-card--primary {
+  background: linear-gradient(135deg, #FFFBE8 0%, #FFF3C0 100%);
+  border-color: rgba(253,192,5,.35);
+  box-shadow: 0 4px 20px rgba(253,192,5,.15);
+}
+.adm-stat-card--primary .adm-stat-num { font-size: 52px; }
+.adm-stat-card--primary .adm-stat-label { color: #8A6000; font-size: 10px; }
+
+/* ── Card alerta (vencidas) ── */
+.adm-stat-card--alert {
+  border-color: rgba(231,76,60,.2);
+}
+.adm-stat-card--alert:hover {
+  border-color: #E74C3C;
+  box-shadow: 0 8px 32px rgba(231,76,60,.15);
+}
+
+/* ── KPI Row ── */
+.adm-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+.adm-kpi-card {
+  background: #FFFFFF;
+  border: 1px solid #E8E5D5;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  transition: transform .2s, box-shadow .2s;
+  cursor: default;
+}
+.adm-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.07);
+}
+.adm-kpi-icon {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.adm-kpi-body { min-width: 0; }
+.adm-kpi-val {
+  font-family: var(--fd);
+  font-size: 22px;
+  color: #1A1200;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.adm-kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1A1200;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adm-kpi-sub {
+  font-size: 10px;
+  color: #8A7830;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media(max-width:1300px) {
+  .adm-kpi-row { grid-template-columns: repeat(4,1fr); }
+}
+@media(max-width:900px) {
+  .adm-kpi-row { grid-template-columns: repeat(2,1fr); }
+}
+
 </style>
 </head>
 <body>
@@ -2036,13 +2115,15 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 
         <!-- Stats row -->
         <div class="adm-stats-row">
-          <div class="adm-stat-card" onclick="filtrarPorEstado('')">
+
+          <!-- CARD PRINCIPAL: Total Solicitudes (mayor tamaño, más relevancia) -->
+          <div class="adm-stat-card adm-stat-card--primary" onclick="filtrarPorEstado('')">
             <div class="adm-stat-header">
-              <div class="adm-stat-icon" style="background:rgba(253,192,5,.15);color:#FDC005">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="adm-stat-icon" style="background:rgba(253,192,5,.15);color:#8A5F00">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               </div>
               <div>
-                <div class="adm-stat-label">SOLICITUDES</div>
+                <div class="adm-stat-label">TOTAL SOLICITUDES</div>
                 <div class="adm-stat-num" id="st-total">0</div>
               </div>
             </div>
@@ -2053,6 +2134,7 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
             <canvas id="chart-total" class="adm-minichart"></canvas>
           </div>
 
+          <!-- CARD: Pendientes (alerta naranja) -->
           <div class="adm-stat-card" onclick="filtrarPorEstado('pendiente_jefe')">
             <div class="adm-stat-header">
               <div class="adm-stat-icon" style="background:rgba(243,156,18,.15);color:#F39C12">
@@ -2063,12 +2145,11 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
                 <div class="adm-stat-num" id="st-pend" style="color:#F39C12">0</div>
               </div>
             </div>
-            <div class="adm-stat-trend" style="color:var(--text-muted)" id="st-trend-pend">
-              <span>0% vs semana pasada</span>
-            </div>
+            <div class="adm-stat-trend" style="color:#888" id="st-trend-pend"><span>0% vs semana pasada</span></div>
             <canvas id="chart-pend" class="adm-minichart"></canvas>
           </div>
 
+          <!-- CARD: Activas (azul, alta prioridad) -->
           <div class="adm-stat-card" onclick="filtrarPorEstado('activo')">
             <div class="adm-stat-header">
               <div class="adm-stat-icon" style="background:rgba(52,152,219,.15);color:#3498DB">
@@ -2086,6 +2167,24 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
             <canvas id="chart-act" class="adm-minichart"></canvas>
           </div>
 
+          <!-- CARD: Vencidas HOY (alerta roja — alta criticidad) -->
+          <div class="adm-stat-card adm-stat-card--alert" onclick="filtrarPorEstado('activo')" id="card-vencidos">
+            <div class="adm-stat-header">
+              <div class="adm-stat-icon" style="background:rgba(231,76,60,.15);color:#E74C3C">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <div>
+                <div class="adm-stat-label">VENCIDAS</div>
+                <div class="adm-stat-num" id="st-venc" style="color:#E74C3C">0</div>
+              </div>
+            </div>
+            <div class="adm-stat-trend" style="color:#E74C3C;font-size:10px">
+              <span>Préstamos con retorno pendiente</span>
+            </div>
+            <canvas id="chart-venc" class="adm-minichart"></canvas>
+          </div>
+
+          <!-- CARD: Devueltas -->
           <div class="adm-stat-card" onclick="filtrarPorEstado('devuelto')">
             <div class="adm-stat-header">
               <div class="adm-stat-icon" style="background:rgba(46,204,113,.15);color:#2ECC71">
@@ -2096,13 +2195,11 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
                 <div class="adm-stat-num" id="st-dev" style="color:#2ECC71">0</div>
               </div>
             </div>
-            <div class="adm-stat-trend" style="color:var(--text-muted)" id="st-trend-dev">
-              <span>0% vs semana pasada</span>
-            </div>
+            <div class="adm-stat-trend" style="color:#888" id="st-trend-dev"><span>0% vs semana pasada</span></div>
             <canvas id="chart-dev" class="adm-minichart"></canvas>
           </div>
 
-          <!-- Donut chart card -->
+          <!-- DONUT -->
           <div class="adm-stat-card adm-donut-card">
             <div class="adm-stat-label" style="margin-bottom:12px">Solicitudes por estado</div>
             <div style="display:flex;gap:16px;align-items:center">
@@ -2110,6 +2207,96 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
               <div class="adm-donut-legend" id="donut-legend"></div>
             </div>
           </div>
+
+        </div>
+
+        <!-- ── SEGUNDA FILA: KPIs de gestión y satisfacción ── -->
+        <div class="adm-kpi-row">
+
+          <!-- KPI: Tiempo promedio aprobación -->
+          <div class="adm-kpi-card">
+            <div class="adm-kpi-icon" style="background:rgba(52,152,219,.1);color:#3498DB">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="adm-kpi-body">
+              <div class="adm-kpi-val" id="kpi-tiempo-apro">—</div>
+              <div class="adm-kpi-label">Tiempo prom. aprobación</div>
+              <div class="adm-kpi-sub">Días desde solicitud → aprobado</div>
+            </div>
+          </div>
+
+          <!-- KPI: Tasa de aprobación -->
+          <div class="adm-kpi-card">
+            <div class="adm-kpi-icon" style="background:rgba(46,204,113,.1);color:#2ECC71">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="adm-kpi-body">
+              <div class="adm-kpi-val" id="kpi-tasa-apro" style="color:#2ECC71">0%</div>
+              <div class="adm-kpi-label">Tasa de aprobación</div>
+              <div class="adm-kpi-sub">Aprobadas / Total solicitudes</div>
+            </div>
+          </div>
+
+          <!-- KPI: Tasa de observación (indicador de calidad) -->
+          <div class="adm-kpi-card">
+            <div class="adm-kpi-icon" style="background:rgba(231,76,60,.1);color:#E74C3C">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="adm-kpi-body">
+              <div class="adm-kpi-val" id="kpi-tasa-obs" style="color:#E74C3C">0%</div>
+              <div class="adm-kpi-label">Tasa de observación</div>
+              <div class="adm-kpi-sub">Solicitudes con correcciones</div>
+            </div>
+          </div>
+
+          <!-- KPI: Solicitantes activos -->
+          <div class="adm-kpi-card">
+            <div class="adm-kpi-icon" style="background:rgba(155,89,182,.1);color:#9B59B6">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="adm-kpi-body">
+              <div class="adm-kpi-val" id="kpi-solic-activos">0</div>
+              <div class="adm-kpi-label">Solicitantes activos</div>
+              <div class="adm-kpi-sub">Con préstamos en curso</div>
+            </div>
+          </div>
+
+          <!-- KPI: Préstamos por solicitante -->
+          <div class="adm-kpi-card">
+            <div class="adm-kpi-icon" style="background:rgba(253,192,5,.1);color:#8A5F00">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <div class="adm-kpi-body">
+              <div class="adm-kpi-val" id="kpi-solic-prom">0</div>
+              <div class="adm-kpi-label">Solicitudes por persona</div>
+              <div class="adm-kpi-sub">Promedio histórico</div>
+            </div>
+          </div>
+
+          <!-- KPI: Clientes con préstamos -->
+          <div class="adm-kpi-card">
+            <div class="adm-kpi-icon" style="background:rgba(52,152,219,.1);color:#3498DB">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div class="adm-kpi-body">
+              <div class="adm-kpi-val" id="kpi-clientes">0</div>
+              <div class="adm-kpi-label">Clientes con préstamos</div>
+              <div class="adm-kpi-sub">Clientes únicos atendidos</div>
+            </div>
+          </div>
+
+          <!-- KPI: Duración promedio préstamo -->
+          <div class="adm-kpi-card">
+            <div class="adm-kpi-icon" style="background:rgba(46,204,113,.1);color:#27AE60">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="adm-kpi-body">
+              <div class="adm-kpi-val" id="kpi-duracion">0d</div>
+              <div class="adm-kpi-label">Duración prom. préstamo</div>
+              <div class="adm-kpi-sub">Días por cada préstamo</div>
+            </div>
+          </div>
+
         </div>
 
         <!-- Tabla de solicitudes -->
@@ -5381,6 +5568,26 @@ async function actualizarMetricas(sols) {
     dibujarMinichart('chart-act',[0,0,1,1,0,1,activos.length],'#3498DB');
     dibujarMinichart('chart-dev',[0,1,2,1,3,2,(sols||[]).filter(s=>s.estado==='devuelto').length],'#2ECC71');
   },100);
+
+  // ── KPIs adicionales ──
+  const hoyKpi = new Date();
+  const vencCount = (sols||[]).filter(s=>s.estado==='activo' && s.fecha_retorno && new Date(s.fecha_retorno) < hoyKpi).length;
+  const g2 = id => document.getElementById(id);
+  if(g2('st-venc')) g2('st-venc').textContent = vencCount;
+  const cardVenc = g2('card-vencidos');
+  if(cardVenc && vencCount > 0){cardVenc.style.borderColor='rgba(231,76,60,.4)';cardVenc.style.background='rgba(231,76,60,.04)';}
+  const aprobT2=(sols||[]).filter(s=>['aprobado','activo','devuelto'].includes(s.estado)).length;
+  if(g2('kpi-tasa-apro')) g2('kpi-tasa-apro').textContent=total?Math.round(aprobT2/total*100)+'%':'0%';
+  const obsC=(sols||[]).filter(s=>s.estado==='observado_jefe').length;
+  if(g2('kpi-tasa-obs')) g2('kpi-tasa-obs').textContent=total?Math.round(obsC/total*100)+'%':'0%';
+  const sActivos=new Set((sols||[]).filter(s=>s.estado==='activo').map(s=>s.solicitante_user_id||s.solicitante_nombre).filter(Boolean));
+  if(g2('kpi-solic-activos')) g2('kpi-solic-activos').textContent=sActivos.size||0;
+  const allS=new Set((sols||[]).map(s=>s.solicitante_user_id||s.solicitante_nombre).filter(Boolean));
+  if(g2('kpi-solic-prom')) g2('kpi-solic-prom').textContent=allS.size?(total/allS.size).toFixed(1):0;
+  const cliU=new Set((sols||[]).map(s=>s.cliente_id||s.cliente_nombre).filter(Boolean));
+  if(g2('kpi-clientes')) g2('kpi-clientes').textContent=cliU.size||0;
+  if(g2('kpi-duracion')) g2('kpi-duracion').textContent=diasProm+'d';
+  if(g2('kpi-tiempo-apro')) g2('kpi-tiempo-apro').textContent=diasProm+'d';
 }
 // Override loadDashboard para incluir métricas
 const _origLoadDash=loadDashboard;

@@ -1005,7 +1005,7 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 
 /* ─ TOPBAR ─ */
 .adm-topbar {
-  height: 60px;
+  height: 52px;
   background: #15130A;
   border-bottom: 1px solid rgba(253,192,5,.08);
   display: flex;
@@ -1060,18 +1060,18 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 24px 24px 0;
+  padding: 16px 20px 0;
 }
 
 /* ─ GREETING ─ */
 .adm-greeting {
   display: flex; align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+  margin-bottom: 16px; flex-wrap: wrap; gap: 8px;
 }
 .adm-greeting-title {
   font-family: var(--fd);
-  font-size: 28px;
+  font-size: 22px;
   letter-spacing: 1px;
   color: var(--text);
   margin: 0 0 4px;
@@ -1090,16 +1090,16 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 .adm-stats-grid { display: flex; flex-direction: column; gap: 20px; }
 .adm-stats-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr) 1.4fr;
-  gap: 14px;
+  grid-template-columns: repeat(4, 1fr) 1.1fr;
+  gap: 12px;
 }
 
 /* ─ STAT CARD ─ */
 .adm-stat-card {
   background: #1A1800;
   border: 1px solid rgba(253,192,5,.1);
-  border-radius: 14px;
-  padding: 18px 18px 0;
+  border-radius: 12px;
+  padding: 14px 14px 0;
   cursor: pointer;
   transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s, border-color .25s;
   overflow: hidden;
@@ -1110,10 +1110,10 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
   border-color: rgba(253,192,5,.3);
   box-shadow: 0 12px 40px rgba(0,0,0,.4);
 }
-.adm-stat-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.adm-stat-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
 .adm-stat-icon {
-  width: 42px; height: 42px;
-  border-radius: 10px;
+  width: 36px; height: 36px;
+  border-radius: 9px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
@@ -1123,7 +1123,7 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
   margin-bottom: 4px;
 }
 .adm-stat-num {
-  font-family: var(--fd); font-size: 40px;
+  font-family: var(--fd); font-size: 34px;
   line-height: 1; color: var(--text);
 }
 .adm-stat-trend {
@@ -1134,9 +1134,9 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 }
 .adm-minichart {
   display: block;
-  width: 100%; height: 50px;
-  margin: 0 -18px;
-  width: calc(100% + 36px);
+  height: 40px;
+  margin: 0 -14px;
+  width: calc(100% + 28px);
 }
 .adm-donut-card { cursor: default; }
 .adm-donut-card:hover { transform: none; }
@@ -1159,10 +1159,10 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 
 /* ─ INNER TABS ─ */
 .adm-tabs-row {
-  padding: 16px 20px 0;
+  padding: 12px 16px 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 .adm-inner-tabs { display: flex; gap: 4px; }
 .adm-inner-tab {
@@ -1182,7 +1182,7 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 /* ─ FILTER ROW ─ */
 .adm-filter-row {
   display: flex; align-items: center;
-  gap: 8px; padding: 12px 20px 16px; flex-wrap: wrap;
+  gap: 8px; padding: 8px 16px 12px; flex-wrap: wrap;
 }
 .adm-filter-btn {
   display: flex; align-items: center; gap: 6px;
@@ -1226,7 +1226,7 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 .adm-table thead tr { background: #242000; }
 .adm-table th {
   font-family: var(--fm); font-size: 10px; letter-spacing: 2px;
-  color: rgba(253,192,5,.5); padding: 13px 16px;
+  color: rgba(253,192,5,.5); padding: 10px 14px;
   text-align: left; font-weight: 600;
   border-bottom: 1px solid rgba(253,192,5,.1);
   text-transform: uppercase;
@@ -1239,7 +1239,7 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 .adm-table tbody tr:hover { background: rgba(253,192,5,.04); }
 .adm-table tbody tr:hover td:first-child { border-left: 3px solid #FDC005; padding-left: 13px; }
 .adm-table td {
-  padding: 12px 16px; color: rgba(253,192,5,.6);
+  padding: 10px 14px; color: rgba(253,192,5,.6);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   border-left: 3px solid transparent;
   transition: color .15s;
@@ -1343,11 +1343,7 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 
 /* ─ MÉTRICAS INFERIORES ─ */
 .adm-metrics-row {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 14px;
-  margin-top: 20px;
-  padding-bottom: 32px;
+  display: none;
 }
 .adm-metric-card {
   background: #1A1800;
@@ -1698,7 +1694,7 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
   border-color: rgba(253,192,5,.35);
   box-shadow: 0 4px 20px rgba(253,192,5,.15);
 }
-.adm-stat-card--primary .adm-stat-num { font-size: 52px; }
+.adm-stat-card--primary .adm-stat-num { font-size: 42px; }
 .adm-stat-card--primary .adm-stat-label { color: #8A6000; font-size: 10px; }
 
 /* ── Card alerta (vencidas) ── */
@@ -1713,17 +1709,17 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 /* ── KPI Row ── */
 .adm-kpi-row {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 12px;
 }
 .adm-kpi-card {
   background: #FFFFFF;
   border: 1px solid #E8E5D5;
-  border-radius: 12px;
-  padding: 14px;
+  border-radius: 10px;
+  padding: 12px;
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: flex-start;
   transition: transform .2s, box-shadow .2s;
   cursor: default;
@@ -1733,18 +1729,18 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
   box-shadow: 0 6px 20px rgba(0,0,0,.07);
 }
 .adm-kpi-icon {
-  width: 36px; height: 36px;
-  border-radius: 9px;
+  width: 30px; height: 30px;
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
 .adm-kpi-body { min-width: 0; }
 .adm-kpi-val {
   font-family: var(--fd);
-  font-size: 22px;
+  font-size: 18px;
   color: #1A1200;
   line-height: 1;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
 }
 .adm-kpi-label {
   font-size: 11px;
@@ -2147,24 +2143,6 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
             </div>
             <div class="adm-stat-trend" style="color:#888" id="st-trend-pend"><span>0% vs semana pasada</span></div>
             <canvas id="chart-pend" class="adm-minichart"></canvas>
-          </div>
-
-          <!-- CARD: Activas (azul, alta prioridad) -->
-          <div class="adm-stat-card" onclick="filtrarPorEstado('activo')">
-            <div class="adm-stat-header">
-              <div class="adm-stat-icon" style="background:rgba(52,152,219,.15);color:#3498DB">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              </div>
-              <div>
-                <div class="adm-stat-label">ACTIVAS</div>
-                <div class="adm-stat-num" id="st-act" style="color:#3498DB">0</div>
-              </div>
-            </div>
-            <div class="adm-stat-trend" id="st-trend-act">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-              <span>+8% vs semana pasada</span>
-            </div>
-            <canvas id="chart-act" class="adm-minichart"></canvas>
           </div>
 
           <!-- CARD: Vencidas HOY (alerta roja — alta criticidad) -->
@@ -5565,7 +5543,7 @@ async function actualizarMetricas(sols) {
   setTimeout(()=>{
     dibujarMinichart('chart-total',v,'#FDC005');
     dibujarMinichart('chart-pend',[0,1,0,2,1,0,pend],'#F39C12');
-    dibujarMinichart('chart-act',[0,0,1,1,0,1,activos.length],'#3498DB');
+    // chart-act eliminado
     dibujarMinichart('chart-dev',[0,1,2,1,3,2,(sols||[]).filter(s=>s.estado==='devuelto').length],'#2ECC71');
   },100);
 

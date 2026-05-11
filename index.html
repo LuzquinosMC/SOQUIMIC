@@ -1143,8 +1143,8 @@ tbody tr:hover td{background:rgba(245,197,24,.04);}
 .adm-donut-card:hover { transform: none; }
 .adm-donut-legend { font-size: 12px; display:flex; flex-wrap:wrap; gap:6px 20px; }
 .adm-donut-legend-item {
-  display: flex; align-items: center; gap: 6px;
-  margin-bottom: 0; color: #4A4020;
+display: flex; align-items: center; gap: 6px;
+  margin-bottom: 0; color: #2A2010;
   font-size:12px;
 }
 .adm-donut-dot {
@@ -5587,7 +5587,7 @@ async function actualizarMetricas(sols) {
   ];
   dibujarDonut('chart-donut',estados.filter(d=>d.valor>0));
   const legend=g('donut-legend');
-  if(legend)legend.innerHTML=estados.map(d=>`<div class="adm-donut-legend-item"><div class="adm-donut-dot" style="background:${d.color}"></div><span>${d.label}</span><span style="margin-left:auto;color:var(--text);font-weight:600">${d.valor} (${total?Math.round(d.valor/total*100):0}%)</span></div>`).join('');
+  if(legend)legend.innerHTML=estados.map(d=>`<div class="adm-donut-legend-item"><div class="adm-donut-dot" style="background:${d.color}"></div><span>${d.label}</span><span style="margin-left:auto;color:#1A1200;font-weight:700">${d.valor} (${total?Math.round(d.valor/total*100):0}%)</span></div>`).join('');
   const v=[2,3,1,4,2,5,total||0];
   setTimeout(()=>{
     dibujarMinichart('chart-total',v,'#FDC005');

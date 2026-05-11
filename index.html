@@ -3426,10 +3426,12 @@ async function loadSolicitudes() {
       (s.cliente_nombre||'').toLowerCase().includes(buscar)||
       (s.solicitante_dni||'').includes(buscar));
     // Stats
-    document.getElementById('st-total').textContent=(data||[]).length;
-    document.getElementById('st-pend').textContent=(data||[]).filter(s=>s.estado==='pendiente').length;
-    document.getElementById('st-act').textContent=(data||[]).filter(s=>s.estado==='activo').length;
-    document.getElementById('st-dev').textContent=(data||[]).filter(s=>s.estado==='devuelto').length;
+   // DESPUÉS — con null-check en cada asignación
+    const _g=id=>document.getElementById(id);
+    if(_g('st-total')) _g('st-total').textContent=(data||[]).length;
+    if(_g('st-pend'))  _g('st-pend').textContent=(data||[]).filter(s=>s.estado==='pendiente').length;
+    if(_g('st-act'))   _g('st-act').textContent=(data||[]).filter(s=>s.estado==='activo').length;
+    if(_g('st-dev'))   _g('st-dev').textContent=(data||[]).filter(s=>s.estado==='devuelto').length;
     const tbody=document.getElementById('sol-tbody');
     if (!rows.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:32px">Sin resultados</td></tr>';return;}
     tbody.innerHTML=rows.map(s=>`<tr>

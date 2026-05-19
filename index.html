@@ -337,14 +337,15 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 /* ── PRINT ── */
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  body>*:not(#print-area){display:none!important}
   body{background:#fff!important;overflow:visible!important;margin:0!important;padding:0!important}
-  .screen{display:none!important}
-  .modal-bg{display:none!important}
-  #print-area{display:block!important}
-  #loader,#toast-wrap,#btn-close-print{display:none!important}
-  .pf-page{page-break-after:always;page-break-inside:avoid}
+  .screen,.modal-bg,#loader,#toast-wrap,#btn-close-print,header,nav,footer,
+  .topbar,.adm-sidebar,.adm-topbar,[id^="screen-"]{display:none!important}
+  #print-area{display:block!important;position:static!important;width:100%!important}
+  .pf-page{page-break-after:always;page-break-inside:avoid;margin:0;padding:12mm 12mm 10mm;box-sizing:border-box;}
   .pf-page:last-child{page-break-after:auto}
-  @page{margin:0;size:A4 portrait}
+  .pf-page-content{max-width:100%;overflow:hidden;}
+  @page{margin:8mm;size:A4 portrait}
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -2357,7 +2358,7 @@ display: flex; align-items: center; gap: 6px;
                 Solicitante
               </button>
               <div style="flex:1"></div>
-              <button class="adm-btn-primary" onclick="openModal('modal-ver-sol');currentSolData=null;document.getElementById('ver-folio').textContent='Nueva Solicitud'">
+              <button class="adm-btn-primary" onclick="admCrearNuevaSolicitud()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Nueva solicitud
               </button>
@@ -2368,15 +2369,15 @@ display: flex; align-items: center; gap: 6px;
           <div class="adm-table-wrap">
             <table class="adm-table">
               <colgroup>
-                <col style="width:155px"/><col style="width:160px"/><col style="width:95px"/>
-                <col style="width:130px"/><col style="width:110px"/><col style="width:110px"/>
-                <col style="width:120px"/><col style="width:140px"/>
+                <col style="width:160px"/><col style="width:180px"/>
+                <col style="width:150px"/><col style="width:115px"/><col style="width:115px"/>
+                <col style="width:120px"/><col style="width:150px"/>
               </colgroup>
               <thead><tr>
-                <th>N° SOLICITUD</th><th>SOLICITANTE</th><th>DNI</th><th>CLIENTE</th>
+                <th>N° SOLICITUD</th><th>SOLICITANTE</th><th>CLIENTE</th>
                 <th>F. PRÉSTAMO</th><th>F. RETORNO</th><th>ESTADO</th><th>ACCIONES</th>
               </tr></thead>
-              <tbody id="sol-tbody"><tr><td colspan="8" class="adm-table-empty">Cargando solicitudes...</td></tr></tbody>
+              <tbody id="sol-tbody"><tr><td colspan="7" class="adm-table-empty">Cargando solicitudes...</td></tr></tbody>
             </table>
           </div>
 
@@ -2550,7 +2551,7 @@ display: flex; align-items: center; gap: 6px;
             <table class="adm-table">
               <colgroup><col style="width:170px"/><col style="width:190px"/><col style="width:95px"/><col style="width:100px"/><col style="width:140px"/><col style="width:110px"/><col style="width:85px"/><col/></colgroup>
               <thead><tr><th>NOMBRE</th><th>EMAIL</th><th>DNI</th><th>LICENCIA</th><th>CARGO</th><th>ÁREA</th><th>ESTADO</th><th>ACCIONES</th></tr></thead>
-              <tbody id="solic-tbody"><tr><td colspan="8" class="adm-table-empty">Cargando solicitantes...</td></tr></tbody>
+              <tbody id="solic-tbody"><tr><td colspan="7" class="adm-table-empty">Cargando solicitantes...</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -2724,23 +2725,29 @@ display: flex; align-items: center; gap: 6px;
 <!-- ════════════ MODAL: VER/EDITAR SOLICITUD (almacén) ════════════ -->
 <div id="modal-ver-sol" class="modal-bg">
   <div class="modal modal-wide">
-    <div class="panel-header" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+    <div class="panel-header" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
       <div class="ph-bar"></div>
-      <div class="panel-title" id="ver-sol-folio" style="font-size:15px;color:var(--orange);letter-spacing:2px">—</div>
-      <div style="margin-left:auto;display:flex;gap:8px">
+      <div>
+        <div class="panel-title" id="ver-sol-folio" style="font-size:15px;color:var(--orange);letter-spacing:2px">—</div>
+        <div id="ver-sol-estado-badge" style="margin-top:4px;font-family:var(--fm);font-size:11px;letter-spacing:1px;color:var(--text-dim)">—</div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
         <button class="btn-sm btn-sm-ghost" onclick="imprimirSolicitudAlmacen(currentSolData)"><span class="ic-print"></span> Imprimir</button>
         <button class="btn-sm btn-sm-ghost" onclick="descargarPdfAlmacen()"><span class="ic-download"></span> PDF</button>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;font-size:13px">
-      <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">SOLICITANTE</span><span id="ver-nombre" style="color:var(--text)">—</span></div>
-      <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">DNI</span><span id="ver-dni" style="color:var(--text)">—</span></div>
-      <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">CARGO</span><span id="ver-cargo" style="color:var(--text)">—</span></div>
-      <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">ÁREA</span><span id="ver-area" style="color:var(--text)">—</span></div>
-      <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">CLIENTE</span><span id="ver-cliente" style="color:var(--text)">—</span></div>
-      <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">PROYECTO</span><span id="ver-proyecto" style="color:var(--text)">—</span></div>
-      <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">F. PRÉSTAMO</span><span id="ver-fprest" style="color:var(--text)">—</span></div>
-      <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">F. RETORNO</span><span id="ver-fret" style="color:var(--text)">—</span></div>
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:13px;margin-bottom:10px;">
+        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">SOLICITANTE</span><span id="ver-nombre" style="color:var(--text);font-weight:500">—</span></div>
+        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">DNI</span><span id="ver-dni" style="color:var(--text);font-family:var(--fm)">—</span></div>
+        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">CARGO / ÁREA</span><span id="ver-cargo" style="color:var(--text)">—</span> <span style="color:var(--text-dim);font-size:11px">·</span> <span id="ver-area" style="color:var(--text-muted);font-size:12px">—</span></div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;font-size:13px;">
+        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">CLIENTE</span><span id="ver-cliente" style="color:var(--text)">—</span></div>
+        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">PROYECTO / OBRA</span><span id="ver-proyecto" style="color:var(--text)">—</span></div>
+        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">F. PRÉSTAMO</span><span id="ver-fprest" style="color:var(--chryso);font-family:var(--fm)">—</span></div>
+        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">F. RETORNO</span><span id="ver-fret" style="color:var(--amber);font-family:var(--fm)">—</span></div>
+      </div>
     </div>
     <div style="margin-bottom:16px">
       <div style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:6px">ESTADO</div>
@@ -3412,6 +3419,24 @@ async function loadDashboard() {
   await Promise.all([loadSolicitudes(),loadInventario(),loadClientes()]);
 }
 
+// Función para crear nueva solicitud desde el panel admin
+function admCrearNuevaSolicitud() {
+  // Limpiar el formulario de solicitud
+  ['s1-nombre','s1-dni','s1-licencia','s1-cond-nombre','s1-cond-dni'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  ['s2-cliente','s2-proyecto','s2-ciudad','s2-ruc','s2-dir','s2-fret','s2-fprest'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  // Limpiar carrito
+  if(typeof clearCart==='function') clearCart();
+  else if(state) { state.carrito=[]; state.step1={}; state.step2={}; if(typeof renderCart==='function') renderCart(); }
+  // Navegar a la pantalla de solicitud
+  showScreen('screen-solicitante');
+  // Generar folio nuevo
+  if(typeof syncFolio==='function') setTimeout(syncFolio, 200);
+}
+
 async function loadSolicitudes() {
   showLoader(true);
   try {
@@ -3433,11 +3458,10 @@ async function loadSolicitudes() {
     if(_g('st-act'))   _g('st-act').textContent=(data||[]).filter(s=>s.estado==='activo').length;
     if(_g('st-dev'))   _g('st-dev').textContent=(data||[]).filter(s=>s.estado==='devuelto').length;
     const tbody=document.getElementById('sol-tbody');
-    if (!rows.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:32px">Sin resultados</td></tr>';return;}
+    if (!rows.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:32px">Sin resultados</td></tr>';return;}
     tbody.innerHTML=rows.map(s=>`<tr>
       <td><span class="link-or">${s.folio}</span></td>
       <td>${s.solicitante_nombre||'—'}</td>
-      <td style="font-family:var(--fm);font-size:12px">${s.solicitante_dni||'—'}</td>
       <td>${(s.cliente_nombre||'—').substring(0,22)+((s.cliente_nombre||'').length>22?'...':'')}</td>
       <td style="font-family:var(--fm);font-size:12px">${fmtDate(s.fecha_prestamo)}</td>
       <td style="font-family:var(--fm);font-size:12px">${fmtDate(s.fecha_retorno)}</td>
@@ -3455,12 +3479,15 @@ async function verSolicitud(s) {
   showLoader(true);
   try {
     const {data:equipos,error} = await sb.from('solicitud_equipos')
-      .select('id,cantidad,observacion,disponible,inventario(id,nombre,categoria)')
+      .select('id,cantidad,cantidad_aprobada,observacion,disponible,inventario(id,nombre,categoria)')
       .eq('solicitud_id',s.id);
     if (error) throw error;
     s.equipos_detalle = equipos||[];
     currentSolData = s;
     document.getElementById('ver-sol-folio').textContent = s.folio;
+    // Badge de estado en el header
+    const badgeEl = document.getElementById('ver-sol-estado-badge');
+    if (badgeEl) badgeEl.innerHTML = badgeHtml(s.estado||'pendiente');
     document.getElementById('ver-nombre').textContent  = s.solicitante_nombre||'—';
     document.getElementById('ver-dni').textContent     = s.solicitante_dni||'—';
     document.getElementById('ver-cargo').textContent   = s.solicitante_cargo||'—';
@@ -3475,24 +3502,38 @@ async function verSolicitud(s) {
     if (!equipos.length) { lista.innerHTML='<div style="font-size:13px;color:var(--text-dim);padding:8px 0">Sin equipos registrados</div>'; }
     else { lista.innerHTML = equipos.map(e=>`
       <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
-          <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div style="flex:1;min-width:160px;">
             <div style="font-size:13px;color:var(--text);font-weight:500">${e.inventario?.nombre||'—'}</div>
-            <div style="font-family:var(--fm);font-size:10px;color:var(--text-dim)">${e.inventario?.categoria||''} · Cant: ${e.cantidad}</div>
+            <div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);margin-top:2px">${e.inventario?.categoria||''}</div>
           </div>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text-muted)">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text-muted);white-space:nowrap">
             <input type="checkbox" id="disp-${e.id}" ${e.disponible!==false?'checked':''}
               style="accent-color:var(--green);width:16px;height:16px;"
               onchange="toggleDisponible('${e.id}',this.checked)"/>
             Disponible
           </label>
         </div>
-        <div>
-          <div style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:4px">OBSERVACIÓN</div>
-          <input type="text" id="obs-${e.id}" class="field-input"
-            value="${(e.observacion||'').replace(/"/g,'&quot;')}"
-            placeholder="Ej: En mantenimiento hasta 25/04..."
-            style="font-size:12px;padding:8px 12px;${e.disponible===false?'border-color:var(--red);':''}"/>
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;align-items:start;">
+          <div>
+            <div style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:4px">CANT. SOLICITADA → APROBADA</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-family:var(--fm);font-size:12px;color:var(--text-dim);text-decoration:line-through;">${e.cantidad}</span>
+              <span style="color:var(--text-dim);font-size:11px;">→</span>
+              <input type="number" id="qty-${e.id}" class="field-input"
+                value="${e.cantidad_aprobada??e.cantidad}"
+                min="0" max="${e.cantidad}"
+                style="width:70px;font-size:13px;padding:6px 10px;font-family:var(--fm);font-weight:700;color:var(--chryso);text-align:center;"
+                oninput="syncCantAprobada('${e.id}',this.value,${e.cantidad})"/>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:4px">OBSERVACIÓN</div>
+            <input type="text" id="obs-${e.id}" class="field-input"
+              value="${(e.observacion||'').replace(/"/g,'&quot;')}"
+              placeholder="Ej: Solo se aprueban 50 unidades..."
+              style="font-size:12px;padding:8px 12px;${e.disponible===false?'border-color:var(--red);':''}"/>
+          </div>
         </div>
       </div>`).join(''); }
     openModal('modal-ver-sol');
@@ -3506,6 +3547,28 @@ function toggleDisponible(eqId,checked) {
   if(currentSolData?.equipos_detalle){
     const eq=currentSolData.equipos_detalle.find(e=>e.id===eqId);
     if(eq) eq.disponible=checked;
+  }
+}
+
+// Sincronizar color del input de cantidad aprobada
+function syncCantAprobada(eqId, val, maxQty) {
+  const n = parseInt(val)||0;
+  const el = document.getElementById('qty-'+eqId);
+  if (!el) return;
+  if (n < maxQty) {
+    el.style.color = 'var(--amber)';
+    el.style.borderColor = 'var(--amber)';
+  } else if (n === 0) {
+    el.style.color = 'var(--red)';
+    el.style.borderColor = 'var(--red)';
+  } else {
+    el.style.color = 'var(--chryso)';
+    el.style.borderColor = '';
+  }
+  // Actualizar en memoria
+  if (currentSolData?.equipos_detalle) {
+    const eq = currentSolData.equipos_detalle.find(e=>e.id===eqId);
+    if (eq) eq.cantidad_aprobada = n;
   }
 }
 
@@ -3528,9 +3591,12 @@ async function guardarEdicionSolicitud() {
     for (const eq of (currentSolData.equipos_detalle||[])) {
       const obsEl=document.getElementById(`obs-${eq.id}`);
       const dispEl=document.getElementById(`disp-${eq.id}`);
+      const qtyEl=document.getElementById(`qty-${eq.id}`);
+      const cantAprobada = qtyEl ? (parseInt(qtyEl.value)||eq.cantidad) : (eq.cantidad_aprobada??eq.cantidad);
       await sb.from('solicitud_equipos').update({
         observacion:obsEl?obsEl.value.trim()||null:eq.observacion,
-        disponible:dispEl?dispEl.checked:eq.disponible
+        disponible:dispEl?dispEl.checked:eq.disponible,
+        cantidad_aprobada: cantAprobada
       }).eq('id',eq.id);
     }
     toast('Solicitud actualizada','ok');
@@ -3801,13 +3867,13 @@ function generarHtmlFormato(sol, equipos) {
   for(let i=0;i<nRows;i++){
     const a=col1[i],b=col2[i],c=col3[i];
     reqRows+=`<tr>
-      <td style="border:1px solid #000;padding:2px 3px;text-align:center;width:25px">${a?a.cantidad:''}</td>
+      <td style="border:1px solid #000;padding:2px 3px;text-align:center;width:25px">${a?(a.cantidad_aprobada??a.cantidad):''}</td>
       <td style="border:1px solid #000;padding:2px 3px;font-size:7pt">${a?a.inventario?.nombre||'—':''}</td>
       <td style="border:1px solid #000;padding:2px 3px;text-align:center;width:12px;font-weight:bold">${a?'X':''}</td>
-      <td style="border:1px solid #000;padding:2px 3px;text-align:center;width:25px">${b?b.cantidad:''}</td>
+      <td style="border:1px solid #000;padding:2px 3px;text-align:center;width:25px">${b?(b.cantidad_aprobada??b.cantidad):''}</td>
       <td style="border:1px solid #000;padding:2px 3px;font-size:7pt">${b?b.inventario?.nombre||'—':''}</td>
       <td style="border:1px solid #000;padding:2px 3px;text-align:center;width:12px;font-weight:bold">${b?'X':''}</td>
-      <td style="border:1px solid #000;padding:2px 3px;text-align:center;width:25px">${c?c.cantidad:''}</td>
+      <td style="border:1px solid #000;padding:2px 3px;text-align:center;width:25px">${c?(c.cantidad_aprobada??c.cantidad):''}</td>
       <td style="border:1px solid #000;padding:2px 3px;font-size:7pt">${c?c.inventario?.nombre||'—':''}</td>
       <td style="border:1px solid #000;padding:2px 3px;text-align:center;width:12px;font-weight:bold">${c?'X':''}</td>
     </tr>`;
@@ -3831,7 +3897,7 @@ function generarHtmlFormato(sol, equipos) {
       <td style="padding:3px 4px;text-align:center"><strong>Aprobado por:</strong><br>Gerente General</td>
     </tr></table>`;
   const obsBlock=equiposNoDisp.length?`<div style="margin-top:6px;padding:5px 8px;background:#fff0f0;border:1px solid #c00;font-size:7pt">
-    <strong>EQUIPOS NO DISPONIBLES:</strong><br>${equiposNoDisp.map(e=>`• ${e.inventario?.nombre||'—'} (×${e.cantidad}): ${e.observacion||'Sin disponibilidad'}`).join('<br>')}</div>`:'';
+    <strong>EQUIPOS NO DISPONIBLES:</strong><br>${equiposNoDisp.map(e=>`• ${e.inventario?.nombre||'—'} (solicitado: ${e.cantidad}${(e.cantidad_aprobada!=null&&e.cantidad_aprobada!==e.cantidad)?', aprobado: '+e.cantidad_aprobada:''}): ${e.observacion||'Sin disponibilidad'}`).join('<br>')}</div>`:'';
   const obsAlmacen=sol.obs_almacen?`<div style="margin-top:5px;padding:5px 8px;background:#f0fff4;border:1px solid #15803d;font-size:7pt"><strong>OBSERVACIONES ALMACÉN:</strong><br>${sol.obs_almacen}</div>`:'';
   return `
   <div class="pf-page"><div class="pf-page-content">
@@ -3949,7 +4015,7 @@ async function imprimirSolicitudAlmacen(s) {
   showLoader(true);
   try {
     const {data:eqs} = await sb.from('solicitud_equipos')
-      .select('id,cantidad,observacion,disponible,inventario(id,nombre,categoria)')
+      .select('id,cantidad,cantidad_aprobada,observacion,disponible,inventario(id,nombre,categoria)')
       .eq('solicitud_id', s.id);
     // Leer valores actuales del modal si está abierto (el usuario pudo editarlos)
     const equiposFinales = (eqs||[]).map(eq => {

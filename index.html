@@ -50,7 +50,7 @@ html,body{width:100%;height:100%;background:#F5F5F5;color:var(--text);font-famil
 }
 #screen-landing{
   align-items:center;justify-content:center;overflow-y:auto;
-  background:var(--chryso);
+  background:#FFFFFF;
 }
 
 /* ── SCREENS ── */
@@ -118,7 +118,7 @@ html,body{width:100%;height:100%;background:#F5F5F5;color:var(--text);font-famil
 /* ── LANDING ── */
 #screen-landing{
   align-items:center;justify-content:center;overflow-y:auto;
-  background:var(--chryso);
+  background:#FFFFFF;
 }
 .bg-glow{position:absolute;inset:0;pointer-events:none;z-index:0}
 .bg-glow::before{display:none}
@@ -229,7 +229,7 @@ select.field-input option{background:var(--surface-2)}
 
 /* ── LOGIN ── */
 #screen-login{align-items:center;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 0;}
-.login-card{background:#0F2803;border:2px solid rgba(106,176,35,.3);border-radius:20px;padding:44px 44px 36px;width:420px;max-width:calc(100vw - 40px);display:flex;flex-direction:column;align-items:stretch;animation:fadeSlide .5s ease both;position:relative;z-index:1;margin:auto;box-shadow:0 24px 80px rgba(0,0,0,.5);}
+.login-card{background:var(--chryso);border:2px solid rgba(106,176,35,.3);border-radius:20px;padding:44px 44px 36px;width:420px;max-width:calc(100vw - 40px);display:flex;flex-direction:column;align-items:stretch;animation:fadeSlide .5s ease both;position:relative;z-index:1;margin:auto;box-shadow:0 24px 80px rgba(0,0,0,.5);}
 .login-logo-wrap{display:flex;justify-content:center;margin-bottom:32px}
 .login-logo{height:80px;width:auto;}
 .login-title{font-family:var(--fd);font-size:28px;letter-spacing:2px;color:var(--text);text-align:center;margin-bottom:6px}
@@ -1797,6 +1797,22 @@ display: flex; align-items: center; gap: 6px;
 
 
 
+
+/* Login card field overrides — white inputs on green card */
+.login-card .field-input{background:#FFFFFF;color:#1A1A1A;border:2px solid rgba(255,255,255,.4);}
+.login-card .field-input::placeholder{color:rgba(26,26,26,.4);}
+.login-card .field-input:focus{border-color:#FFFFFF;box-shadow:0 0 0 3px rgba(255,255,255,.25);}
+.login-card .field-label{color:#FFFFFF;}
+.login-card .login-title{color:#FFFFFF;}
+.login-card .login-sub{color:rgba(255,255,255,.85);}
+.login-card .btn-orange{background:#FFFFFF;color:var(--chryso);border:2px solid #FFFFFF;}
+.login-card .btn-orange:hover{background:rgba(255,255,255,.9);}
+.login-card select.field-input{background:#FFFFFF;color:#1A1A1A;}
+
+/* Modal ver-sol — inputs en fondo blanco */
+#modal-ver-sol .field-input{background:#F8FFF0;border-color:rgba(106,176,35,.4);color:#1A1A1A;}
+#modal-ver-sol .field-input:focus{border-color:var(--chryso);box-shadow:0 0 0 3px rgba(106,176,35,.15);}
+#modal-ver-sol .field-input::placeholder{color:#9E9E9E;}
 </style>
 </head>
 <body>
@@ -2710,70 +2726,135 @@ display: flex; align-items: center; gap: 6px;
 
 <!-- ════════════ MODAL: VER/EDITAR SOLICITUD (almacén) ════════════ -->
 <div id="modal-ver-sol" class="modal-bg">
-  <div role="dialog" aria-modal="true" class="modal modal-wide">
-    <div class="panel-header" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
-      <div class="ph-bar"></div>
-      <div>
-        <div class="panel-title" id="ver-sol-folio" style="font-size:15px;color:var(--orange);letter-spacing:2px">—</div>
-        <div id="ver-sol-estado-badge" style="margin-top:4px;font-family:var(--fm);font-size:11px;letter-spacing:1px;color:var(--text-dim)">—</div>
+  <div role="dialog" aria-modal="true" class="modal modal-wide" style="padding:0;overflow:hidden;border:none;background:transparent;box-shadow:none;max-width:780px;">
+
+    <!-- ── HEADER VERDE CHRYSO ── -->
+    <div style="background:var(--chryso);padding:20px 28px 16px;border-radius:16px 16px 0 0;position:relative;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+        <div>
+          <div style="font-family:var(--fm);font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.7);margin-bottom:4px">SOLICITUD</div>
+          <div style="font-family:var(--fd);font-size:22px;letter-spacing:2px;color:#FFFFFF" id="ver-sol-folio">—</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+          <div id="ver-sol-estado-badge" style="font-family:var(--fm);font-size:10px;letter-spacing:1px;padding:5px 14px;border-radius:20px;background:rgba(255,255,255,.2);color:#FFFFFF;border:1px solid rgba(255,255,255,.3)">—</div>
+          <button class="btn-sm btn-sm-ghost" style="background:rgba(255,255,255,.15);color:#FFF;border-color:rgba(255,255,255,.3)" onclick="imprimirSolicitudAlmacen(currentSolData)" aria-label="Imprimir solicitud"><span class="ic-print"></span></button>
+          <button class="btn-sm btn-sm-ghost" style="background:rgba(255,255,255,.15);color:#FFF;border-color:rgba(255,255,255,.3)" onclick="descargarPdfAlmacen()" aria-label="Descargar PDF"><span class="ic-download"></span></button>
+        </div>
       </div>
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-        <button class="btn-sm btn-sm-ghost" onclick="imprimirSolicitudAlmacen(currentSolData)"><span class="ic-print"></span> Imprimir</button>
-        <button class="btn-sm btn-sm-ghost" onclick="descargarPdfAlmacen()"><span class="ic-download"></span> PDF</button>
-      </div>
-    </div>
-    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:13px;margin-bottom:10px;">
-        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">SOLICITANTE</span><span id="ver-nombre" style="color:var(--text);font-weight:500">—</span></div>
-        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">DNI</span><span id="ver-dni" style="color:var(--text);font-family:var(--fm)">—</span></div>
-        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">CARGO / ÁREA</span><span id="ver-cargo" style="color:var(--text)">—</span> <span style="color:var(--text-dim);font-size:11px">·</span> <span id="ver-area" style="color:var(--text-muted);font-size:12px">—</span></div>
-      </div>
-      <div style="border-top:1px solid var(--border);padding-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;font-size:13px;">
-        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">CLIENTE</span><span id="ver-cliente" style="color:var(--text)">—</span></div>
-        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">PROYECTO / OBRA</span><span id="ver-proyecto" style="color:var(--text)">—</span></div>
-        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">F. PRÉSTAMO</span><span id="ver-fprest" style="color:var(--chryso);font-family:var(--fm)">—</span></div>
-        <div><span style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;display:block;margin-bottom:3px">F. RETORNO</span><span id="ver-fret" style="color:var(--amber);font-family:var(--fm)">—</span></div>
-      </div>
-    </div>
-    <div style="margin-bottom:16px">
-      <div style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:6px">ESTADO</div>
-      <select id="ver-estado" class="field-input" style="max-width:260px;font-size:13px" aria-label="Filtrar por estado">
-        <option value="pendiente_jefe">⏳ Pendiente Jefe Comercial</option>
-        <option value="aprobado_jefe">Aprobado por Jefe</option>
-        <option value="observado_jefe">Observado</option>
-        <option value="verificando_stock">Verificando Stock</option>
-        <option value="aprobado">Aprobado p/ Entrega</option>
-        <option value="activo">Activo</option>
-        <option value="devuelto">Devuelto</option>
-        <option value="rechazado">Rechazado</option>
-        <option value="cancelado">Cancelado</option>
-      </select>
-    </div>
-    <div style="margin-bottom:16px">
-      <div style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:10px">EQUIPOS — DISPONIBILIDAD</div>
-      <div id="ver-equipos-lista"></div>
-    </div>
-    <div style="margin-bottom:20px">
-      <div style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:6px">OBSERVACIONES DE ALMACÉN</div>
-      <textarea id="ver-obs-almacen" class="field-input" placeholder="Observaciones generales..." style="height:80px;resize:vertical;font-size:13px;line-height:1.6"></textarea>
-    </div>
-    <!-- Acciones de flujo (dinámicas según rol y estado) -->
-    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px">
-      <div style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:12px">ACCIONES DEL FLUJO</div>
-      <div id="ver-acciones-flujo"><div style="font-size:13px;color:var(--text-dim);text-align:center;padding:8px">Cargando acciones...</div></div>
-    </div>
-    <!-- Historial de estados -->
-    <div style="margin-bottom:16px">
-      <div style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:10px">HISTORIAL DE ESTADOS</div>
-      <div id="ver-historial" style="max-height:160px;overflow-y:auto;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:8px"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-ghost" onclick="closeModal('modal-ver-sol')">Cerrar</button>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-ghost" style="font-size:11px" onclick="imprimirSolicitudAlmacen(currentSolData)"><span class="ic-print"></span> Imprimir</button>
-        <button class="btn btn-orange" onclick="guardarEdicionSolicitud()"><span class="ic-save"></span> Guardar</button>
+
+      <!-- Fechas en el header -->
+      <div style="display:flex;gap:24px;margin-top:14px;">
+        <div>
+          <div style="font-family:var(--fm);font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.6);margin-bottom:2px">PRÉSTAMO</div>
+          <div id="ver-fprest" style="font-family:var(--fd);font-size:14px;color:#FFFFFF;letter-spacing:1px">—</div>
+        </div>
+        <div style="width:1px;background:rgba(255,255,255,.2)"></div>
+        <div>
+          <div style="font-family:var(--fm);font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.6);margin-bottom:2px">RETORNO EST.</div>
+          <div id="ver-fret" style="font-family:var(--fd);font-size:14px;color:#FFFFFF;letter-spacing:1px">—</div>
+        </div>
       </div>
     </div>
+
+    <!-- ── CUERPO BLANCO ── -->
+    <div style="background:#FFFFFF;border-radius:0 0 16px 16px;overflow-y:auto;max-height:60vh;border:1.5px solid rgba(106,176,35,.25);border-top:none;">
+
+      <!-- Datos solicitante + cliente -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1.5px solid #F0F0F0;">
+        <!-- Solicitante -->
+        <div style="padding:18px 20px;border-right:1.5px solid #F0F0F0;">
+          <div style="font-family:var(--fm);font-size:8px;letter-spacing:2.5px;color:var(--chryso);margin-bottom:10px">SOLICITANTE</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div>
+              <div style="font-family:var(--fm);font-size:8px;color:#9E9E9E;letter-spacing:1px;margin-bottom:2px">NOMBRE</div>
+              <div id="ver-nombre" style="font-size:14px;color:#1A1A1A;font-weight:500">—</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <div style="font-family:var(--fm);font-size:8px;color:#9E9E9E;letter-spacing:1px;margin-bottom:2px">DNI</div>
+                <div id="ver-dni" style="font-size:13px;color:#1A1A1A;font-family:var(--fm)">—</div>
+              </div>
+              <div>
+                <div style="font-family:var(--fm);font-size:8px;color:#9E9E9E;letter-spacing:1px;margin-bottom:2px">CARGO</div>
+                <div id="ver-cargo" style="font-size:13px;color:#1A1A1A">—</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:var(--fm);font-size:8px;color:#9E9E9E;letter-spacing:1px;margin-bottom:2px">ÁREA</div>
+              <div id="ver-area" style="font-size:13px;color:#555">—</div>
+            </div>
+          </div>
+        </div>
+        <!-- Cliente / Proyecto -->
+        <div style="padding:18px 20px;">
+          <div style="font-family:var(--fm);font-size:8px;letter-spacing:2.5px;color:var(--chryso);margin-bottom:10px">CLIENTE / OBRA</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div>
+              <div style="font-family:var(--fm);font-size:8px;color:#9E9E9E;letter-spacing:1px;margin-bottom:2px">CLIENTE</div>
+              <div id="ver-cliente" style="font-size:14px;color:#1A1A1A;font-weight:500">—</div>
+            </div>
+            <div>
+              <div style="font-family:var(--fm);font-size:8px;color:#9E9E9E;letter-spacing:1px;margin-bottom:2px">PROYECTO / OBRA</div>
+              <div id="ver-proyecto" style="font-size:13px;color:#1A1A1A">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado + Equipos + Obs -->
+      <div style="padding:18px 20px;">
+
+        <!-- Estado -->
+        <div style="margin-bottom:16px;">
+          <div style="font-family:var(--fm);font-size:8px;letter-spacing:2.5px;color:var(--chryso);margin-bottom:8px">ESTADO DE SOLICITUD</div>
+          <select id="ver-estado" class="field-input" style="max-width:280px;font-size:13px;background:#F8FFF0;border-color:rgba(106,176,35,.4);color:#1A1A1A" aria-label="Filtrar por estado">
+            <option value="pendiente_jefe">⏳ Pendiente Jefe Comercial</option>
+            <option value="aprobado_jefe">✅ Aprobado por Jefe</option>
+            <option value="observado_jefe">⚠️ Observado</option>
+            <option value="verificando_stock">🔍 Verificando Stock</option>
+            <option value="aprobado">📦 Aprobado p/ Entrega</option>
+            <option value="activo">🟢 Activo</option>
+            <option value="devuelto">↩️ Devuelto</option>
+            <option value="rechazado">❌ Rechazado</option>
+            <option value="cancelado">🚫 Cancelado</option>
+          </select>
+        </div>
+
+        <!-- Equipos -->
+        <div style="margin-bottom:16px;">
+          <div style="font-family:var(--fm);font-size:8px;letter-spacing:2.5px;color:var(--chryso);margin-bottom:8px">EQUIPOS — DISPONIBILIDAD Y CANTIDADES</div>
+          <div id="ver-equipos-lista" style="border:1.5px solid #EEE;border-radius:10px;overflow:hidden;"></div>
+        </div>
+
+        <!-- Obs almacén -->
+        <div style="margin-bottom:16px;">
+          <div style="font-family:var(--fm);font-size:8px;letter-spacing:2.5px;color:var(--chryso);margin-bottom:8px">OBSERVACIONES DE ALMACÉN</div>
+          <textarea id="ver-obs-almacen" class="field-input" placeholder="Observaciones generales..." style="height:72px;resize:vertical;font-size:13px;line-height:1.6;background:#F8FFF0;border-color:rgba(106,176,35,.4);color:#1A1A1A"></textarea>
+        </div>
+
+        <!-- Acciones de flujo -->
+        <div style="background:#F8FFF0;border:1.5px solid rgba(106,176,35,.25);border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+          <div style="font-family:var(--fm);font-size:8px;letter-spacing:2.5px;color:var(--chryso);margin-bottom:10px">ACCIONES DEL FLUJO</div>
+          <div id="ver-acciones-flujo"><div style="font-size:13px;color:#888;text-align:center;padding:8px">Cargando acciones...</div></div>
+        </div>
+
+        <!-- Historial -->
+        <div style="margin-bottom:4px;">
+          <div style="font-family:var(--fm);font-size:8px;letter-spacing:2.5px;color:var(--chryso);margin-bottom:8px">HISTORIAL DE ESTADOS</div>
+          <div id="ver-historial" style="max-height:140px;overflow-y:auto;background:#FAFAFA;border:1.5px solid #EEE;border-radius:8px;padding:8px;"></div>
+        </div>
+      </div>
+
+      <!-- Footer de acciones -->
+      <div style="padding:14px 20px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-top:1.5px solid #F0F0F0;background:#FAFAFA;border-radius:0 0 14px 14px;">
+        <button class="btn btn-ghost" style="color:#555;border-color:#DDD" onclick="closeModal('modal-ver-sol')">Cerrar</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn btn-ghost" style="font-size:11px;color:#555;border-color:#DDD" onclick="imprimirSolicitudAlmacen(currentSolData)"><span class="ic-print"></span> Imprimir</button>
+          <button class="btn btn-orange" style="background:var(--chryso);border-color:var(--chryso);" onclick="guardarEdicionSolicitud()"><span class="ic-save"></span> Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 

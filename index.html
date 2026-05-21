@@ -3620,6 +3620,10 @@ async function loadSolicitudes() {
 async function verSolicitud(s) {
   showLoader(true);
   try {
+    // Siempre refrescar el estado desde BD para evitar datos obsoletos
+    const {data:solFresh, error:eFresh} = await sb.from('solicitudes').select('*').eq('id',s.id).single();
+    if (!eFresh && solFresh) s = solFresh;
+
     const {data:equipos,error} = await sb.from('solicitud_equipos')
       .select('id,cantidad,cantidad_aprobada,observacion,disponible,inventario(id,nombre,categoria)')
       .eq('solicitud_id',s.id);
@@ -4444,6 +4448,10 @@ async function confirmarAjustes() {
 function abrirModalEntrega() {
   const sol = currentSolData;
   if (!sol) return;
+  // Guard: solo abrir si el estado es aprobado
+  if (sol.estado !== 'aprobado') {
+    toast('Esta solicitud ya fue entregada o no está lista para entrega.','err'); return;
+  }
   const equipos = (sol.equipos_detalle||[]).filter(e=>e.disponible!==false);
   const eqList = equipos.map(e=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">
     <span style="color:var(--text-dark)">${e.inventario?.nombre||'—'}</span>
@@ -4526,7 +4534,10 @@ async function confirmarEntrega() {
 
     closeModal('modal-entrega');
     closeModal('modal-ver-sol');
-    toast(' Entrega registrada. Ticket: ' + numTicket, 'ok');
+    toast('Entrega registrada. Ticket: ' + numTicket, 'ok');
+
+    // Actualizar currentSolData para que los guards funcionen si el modal se reabre
+    if (currentSolData) currentSolData.estado = 'activo';
 
     // 7. Imprimir ticket
     imprimirTicket('entrega', numTicket, currentSolData, equiposSnap,
@@ -4626,7 +4637,10 @@ async function confirmarDevolucion() {
 
     closeModal('modal-devolucion');
     closeModal('modal-ver-sol');
-    toast(' Devolución registrada. Ticket: ' + numTicket, 'ok');
+    toast('Devolución registrada. Ticket: ' + numTicket, 'ok');
+
+    // Actualizar currentSolData para que los guards funcionen si el modal se reabre
+    if (currentSolData) currentSolData.estado = 'devuelto';
 
     imprimirTicket('devolucion', numTicket, currentSolData, equiposSnap,
       null, null, null, obs, estadoEq);
@@ -4940,6 +4954,9 @@ async function loadSolicitudesJefe() {
 }
 
 async function abrirModalJefe(s) {
+  // Refrescar estado desde BD para evitar mostrar acciones obsoletas
+  const {data:solFresh} = await sb.from('solicitudes').select('*').eq('id',s.id).single();
+  if (solFresh) s = solFresh;
   currentJefeSol = s;
 
   // Cargar equipos
@@ -6114,6 +6131,10 @@ async function validarLimitePrestamos() {
 function abrirModalDevolucion() {
   const sol = currentSolData;
   if (!sol) return;
+  // Guard: solo abrir si el estado es activo
+  if (sol.estado !== 'activo') {
+    toast('Esta solicitud ya fue devuelta o los equipos aún no han sido entregados.','err'); return;
+  }
   const equipos = (sol.equipos_detalle||[]).filter(e => e.disponible !== false);
 
   const eqList = equipos.map(e => {

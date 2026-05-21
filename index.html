@@ -3685,11 +3685,45 @@ async function verSolicitud(s) {
         </div>
       </div>`).join(''); }
     openModal('modal-ver-sol');
+
+    // Bloquear controles si el estado es terminal (devuelto, cancelado, rechazado, activo)
+    const ESTADOS_BLOQUEADOS = ['devuelto','cancelado','rechazado','activo'];
+    const bloqueado = ESTADOS_BLOQUEADOS.includes(s.estado);
+    const footerGuardar = document.querySelector('#modal-ver-sol .btn-orange');
+    const verEstadoEl   = document.getElementById('ver-estado');
+    const verObsEl      = document.getElementById('ver-obs-almacen');
+
+    // Bloquear / desbloquear select de estado y textarea
+    if (verEstadoEl) verEstadoEl.disabled = bloqueado;
+    if (verObsEl)    verObsEl.disabled    = bloqueado;
+
+    // Mostrar / ocultar botón guardar
+    if (footerGuardar) footerGuardar.style.display = bloqueado ? 'none' : '';
+
+    // Bloquear checkboxes y qty de equipos
+    document.querySelectorAll('[id^="disp-"],[id^="qty-"],[id^="obs-"]').forEach(el => {
+      el.disabled = bloqueado;
+      if (bloqueado) el.style.opacity = '0.6';
+    });
+
+    // Mostrar banner de solo lectura si está bloqueado
+    const accionesEl = document.getElementById('ver-acciones-flujo');
+    if (accionesEl && bloqueado) {
+      const msgs = {
+        devuelto:  '✅ Solicitud cerrada — equipos devueltos. Solo lectura.',
+        cancelado: '🚫 Solicitud cancelada. Solo lectura.',
+        rechazado: '❌ Solicitud rechazada. Solo lectura.',
+        activo:    '📦 Equipos entregados. Registra la devolución para cerrar.',
+      };
+      const extra = msgs[s.estado] || 'Solo lectura.';
+      accionesEl.innerHTML = `<div style="padding:10px 14px;background:#F5F5F5;border:1px solid #DDD;border-radius:8px;font-size:13px;color:#555">${extra}</div>` + accionesEl.innerHTML;
+    }
   } catch(e){toast('Error: '+e.message,'err');}
   finally{showLoader(false);}
 }
 
 function toggleDisponible(eqId,checked) {
+  if (['devuelto','cancelado','rechazado','activo'].includes(currentSolData?.estado)) return;
   const obs=document.getElementById(`obs-${eqId}`);
   if(obs) obs.style.borderColor=checked?'':'var(--red)';
   if(currentSolData?.equipos_detalle){
@@ -3700,6 +3734,7 @@ function toggleDisponible(eqId,checked) {
 
 // Sincronizar color del input de cantidad aprobada
 function syncCantAprobada(eqId, val, maxQty) {
+  if (['devuelto','cancelado','rechazado','activo'].includes(currentSolData?.estado)) return;
   const n = parseInt(val)||0;
   const el = document.getElementById('qty-'+eqId);
   if (!el) return;
@@ -3722,6 +3757,13 @@ function syncCantAprobada(eqId, val, maxQty) {
 
 async function guardarEdicionSolicitud() {
   if (!currentSolData) return;
+
+  // Estados terminales: no se puede modificar nada
+  const ESTADOS_BLOQUEADOS = ['devuelto','cancelado','rechazado','activo'];
+  if (ESTADOS_BLOQUEADOS.includes(currentSolData.estado)) {
+    toast(`Esta solicitud está en estado "${currentSolData.estado}" y no puede modificarse.`, 'err');
+    return;
+  }
   const nuevoEstado = document.getElementById('ver-estado')?.value || '';
   const estadosValidos = ['borrador','pendiente_jefe','aprobado_jefe','observado_jefe',
     'verificando_stock','pendiente_almacen','aprobado','rechazado','activo','devuelto','cancelado'];

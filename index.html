@@ -2729,6 +2729,12 @@ display: flex; align-items: center; gap: 6px;
       <input id="eq-nom" class="field-input" type="text" placeholder="Ej: Termómetro de concreto" aria-label="Nombre del equipo"/></div>
     <div class="field-group"><div class="field-label">STOCK <span class="req">*</span></div>
       <input id="eq-stk" class="field-input" type="number" min="0" placeholder="0" aria-label="Stock disponible"/></div>
+    <div class="field-group"><div class="field-label">TIPO DE ÍTEM <span class="req">*</span></div>
+      <select id="eq-tipo" class="field-input" aria-label="Tipo de ítem">
+        <option value="equipo">Equipo — se devuelve, stock se restaura</option>
+        <option value="consumible">Consumible — no se devuelve, stock no se restaura</option>
+      </select>
+    </div>
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
       <button class="btn btn-ghost" onclick="closeModal('modal-equipo')">Cancelar</button>
       <button class="btn btn-orange" onclick="guardarEquipo()">Guardar</button>
@@ -3018,7 +3024,7 @@ function renderInventario() {
     return `<div class="eq-item">
       <div>
         <div class="eq-name">${i.nombre}</div>
-        <div class="eq-cat">${i.categoria} · Stock: ${i.stock}</div>
+        <div class="eq-cat">${i.categoria} · Stock: ${i.stock} · <span style="font-family:var(--fm);font-size:10px;padding:1px 6px;border-radius:10px;background:${i.tipo_item==='consumible'?'#FAEEDA':'#E1F5EE'};color:${i.tipo_item==='consumible'?'#854F0B':'#0F6E56'}">${i.tipo_item==='consumible'?'Consumible':'Equipo'}</span></div>
       </div>
       <div class="eq-qty">
         <button class="qty-btn" aria-label="Reducir cantidad de ${i.nombre}" onclick="cambiarQty('${i.id}',-1)" ${qty===0?'disabled':''}>−</button>
@@ -3784,13 +3790,14 @@ async function loadInventario() {
   if(error){toast('Error inventario: '+error.message,'err');return;}
   const rows=(data||[]).filter(i=>!q||i.nombre.toLowerCase().includes(q)||i.categoria.toLowerCase().includes(q));
   const tbody=document.getElementById('inv-tbody');
-  if(!rows.length){tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-dim);padding:32px">Sin equipos</td></tr>';return;}
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:32px">Sin equipos</td></tr>';return;}
   tbody.innerHTML=rows.map(i=>`<tr>
     <td style="font-family:var(--fm);font-size:11px;color:#6A5A20;font-weight:500">${i.categoria}</td>
     <td style="color:var(--chryso-light);font-weight:600">${i.nombre}</td>
+    <td><span style="font-family:var(--fm);font-size:10px;padding:2px 8px;border-radius:10px;background:${i.tipo_item==='consumible'?'#FAEEDA':'#E1F5EE'};color:${i.tipo_item==='consumible'?'#854F0B':'#0F6E56'}">${i.tipo_item==='consumible'?'Consumible':'Equipo'}</span></td>
     <td><span style="font-family:var(--fm);color:var(--orange);font-weight:600">${i.stock}</span></td>
     <td><div class="actions-cell">
-      <button class="btn-sm btn-sm-ghost" onclick="abrirEditarEquipo('${i.id}','${i.categoria.replace(/'/g,"\\'")}','${i.nombre.replace(/'/g,"\\'")}',${i.stock})">Editar</button>
+      <button class="btn-sm btn-sm-ghost" onclick="abrirEditarEquipo('${i.id}','${i.categoria.replace(/'/g,"\\'")}','${i.nombre.replace(/'/g,"\\'")}',${i.stock},'${i.tipo_item||'equipo'}')">Editar</button>
       <button class="btn-sm btn-sm-red" onclick="eliminarEquipo('${i.id}')">Eliminar</button>
     </div></td></tr>`).join('');
 }
@@ -3800,27 +3807,32 @@ function openModalAddEquipo() {
   document.getElementById('eq-cat').value='';
   document.getElementById('eq-nom').value='';
   document.getElementById('eq-stk').value='';
+  const tipoEl = document.getElementById('eq-tipo');
+  if (tipoEl) tipoEl.value = 'equipo';
   document.getElementById('modal-equipo-title').textContent='AGREGAR EQUIPO';
   openModal('modal-equipo');
 }
 
-function abrirEditarEquipo(id,cat,nom,stk) {
+function abrirEditarEquipo(id,cat,nom,stk,tipo) {
   document.getElementById('eq-id-edit').value=id;
   document.getElementById('eq-cat').value=cat;
   document.getElementById('eq-nom').value=nom;
   document.getElementById('eq-stk').value=stk;
+  const tipoEl = document.getElementById('eq-tipo');
+  if (tipoEl) tipoEl.value = tipo || 'equipo';
   document.getElementById('modal-equipo-title').textContent='EDITAR EQUIPO';
   openModal('modal-equipo');
 }
 
 async function guardarEquipo() {
   const id=v('eq-id-edit'), cat=v('eq-cat'), nom=v('eq-nom'), stk=parseInt(v('eq-stk'));
+  const tipo = document.getElementById('eq-tipo')?.value || 'equipo';
   if(!cat||!nom||isNaN(stk)){toast('Completa todos los campos','err');return;}
   showLoader(true);
   try {
     let res;
-    if(id) { res=await sb.from('inventario').update({categoria:cat,nombre:nom,stock:stk}).eq('id',id); }
-    else   { res=await sb.from('inventario').insert([{categoria:cat,nombre:nom,stock:stk}]); }
+    if(id) { res=await sb.from('inventario').update({categoria:cat,nombre:nom,stock:stk,tipo_item:tipo}).eq('id',id); }
+    else   { res=await sb.from('inventario').insert([{categoria:cat,nombre:nom,stock:stk,tipo_item:tipo}]); }
     if(res.error) throw res.error;
     closeModal('modal-equipo'); toast(id?'Equipo actualizado':'Equipo agregado','ok'); await loadInventario();
   } catch(e){toast('Error: '+e.message,'err');}
@@ -5201,8 +5213,7 @@ function descargarPlantillaSolic() {
   XLSX.writeFile(wb, 'plantilla_solicitantes.xlsx');
 }
 
-// ── AUTOCOMPLETADO en el formulario del trabajador ──
-// Cuando el trabajador escribe su nombre, busca en la BD y rellena el resto
+// ── AUTOCOMPLETADO SOLICITANTE ──
 let solicitantesCache = [];
 
 async function cargarSolicitantesCache() {
@@ -5211,45 +5222,38 @@ async function cargarSolicitantesCache() {
 }
 
 function buscarSolicitanteAutocomplete() {
-  const q = document.getElementById('s1-nombre').value.toLowerCase().trim();
+  const q   = document.getElementById('s1-nombre').value.toLowerCase().trim();
   const box = document.getElementById('s1-suggest');
+  if (!box) return;
   if (!q || q.length < 2) { box.style.display='none'; return; }
   const res = solicitantesCache.filter(s =>
     s.nombre.toLowerCase().includes(q) || (s.dni||'').includes(q)
-  ).slice(0,6);
+  ).slice(0, 6);
   if (!res.length) { box.style.display='none'; return; }
   box.style.display = 'block';
-  box.style.cssText = `display:block;background:var(--surface-2);border:1px solid var(--border-2);
-    border-radius:8px;margin-top:4px;max-height:200px;overflow-y:auto;
-    position:absolute;z-index:100;width:100%;left:0;top:100%;`;
   box.innerHTML = res.map(s => `
-    <div style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px"
+    <div style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;background:var(--surface-2)"
       onmousedown="seleccionarSolicitante(${JSON.stringify(s).replace(/"/g,'&quot;')})"
-      onmouseover="this.style.background='var(--surface-3)'"
-      onmouseout="this.style.background=''">
+      onmouseenter="this.style.background='var(--surface-3)'"
+      onmouseleave="this.style.background='var(--surface-2)'">
       <div style="color:var(--text-dark);font-weight:500">${s.nombre}</div>
-      <div style="font-family:var(--fm);font-size:10px;color:var(--text-dim)">
-        DNI: ${s.dni} &nbsp;·&nbsp; ${s.cargo||'—'} &nbsp;·&nbsp; ${s.area||'—'}
+      <div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);margin-top:2px">
+        DNI: ${s.dni||'—'} &nbsp;·&nbsp; ${s.cargo||'—'} &nbsp;·&nbsp; ${s.area||'—'}
       </div>
     </div>`).join('');
 }
 
 function seleccionarSolicitante(s) {
-  document.getElementById('s1-nombre').value = s.nombre;
-  document.getElementById('s1-dni').value    = s.dni||'';
+  document.getElementById('s1-nombre').value = s.nombre || '';
+  document.getElementById('s1-dni').value    = s.dni    || '';
   if (s.licencia) document.getElementById('s1-licencia').value = s.licencia;
   if (s.cargo) {
     const cargoEl = document.getElementById('s1-cargo');
-    // Si el cargo está en el select, seleccionarlo; si no, agregar option temporal
     let found = false;
     for (const opt of cargoEl.options) {
       if (opt.value.toLowerCase() === s.cargo.toLowerCase()) { cargoEl.value=opt.value; found=true; break; }
     }
-    if (!found) {
-      const opt = document.createElement('option');
-      opt.value = s.cargo; opt.textContent = s.cargo;
-      cargoEl.appendChild(opt); cargoEl.value = s.cargo;
-    }
+    if (!found) { const o=document.createElement('option'); o.value=s.cargo; o.textContent=s.cargo; cargoEl.appendChild(o); cargoEl.value=s.cargo; }
   }
   if (s.area) {
     const areaEl = document.getElementById('s1-area');
@@ -5257,14 +5261,51 @@ function seleccionarSolicitante(s) {
     for (const opt of areaEl.options) {
       if (opt.value.toLowerCase() === s.area.toLowerCase()) { areaEl.value=opt.value; found=true; break; }
     }
-    if (!found) {
-      const opt = document.createElement('option');
-      opt.value = s.area; opt.textContent = s.area;
-      areaEl.appendChild(opt); areaEl.value = s.area;
-    }
+    if (!found) { const o=document.createElement('option'); o.value=s.area; o.textContent=s.area; areaEl.appendChild(o); areaEl.value=s.area; }
   }
   document.getElementById('s1-suggest').style.display = 'none';
-  toast(' Datos completados automáticamente','ok');
+  toast('Datos del solicitante cargados','ok');
+}
+
+// ── AUTOCOMPLETADO CLIENTE ──
+function buscarClienteAutocomplete() {
+  const q   = document.getElementById('s2-nombre').value.toLowerCase().trim();
+  const box = document.getElementById('s2-suggest');
+  if (!box) return;
+  if (!q || q.length < 2) { box.style.display='none'; return; }
+  const res = (state.clientes||[]).filter(c =>
+    (c.nombre||'').toLowerCase().includes(q) ||
+    (c.codigo_sn||'').toLowerCase().includes(q) ||
+    (c.ciudad||'').toLowerCase().includes(q)
+  ).slice(0, 8);
+  if (!res.length) { box.style.display='none'; return; }
+  box.style.display = 'block';
+  box.innerHTML = res.map(c => `
+    <div style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;background:var(--surface-2)"
+      onmousedown="seleccionarCliente(${JSON.stringify(c).replace(/"/g,'&quot;')})"
+      onmouseenter="this.style.background='var(--surface-3)'"
+      onmouseleave="this.style.background='var(--surface-2)'">
+      <div style="color:var(--text-dark);font-weight:500">${c.nombre||'—'}</div>
+      <div style="font-family:var(--fm);font-size:10px;color:var(--text-dim);margin-top:2px">
+        RUC: ${c.codigo_sn||'—'} &nbsp;·&nbsp; ${c.ciudad||'—'}
+      </div>
+    </div>`).join('');
+}
+
+function seleccionarCliente(c) {
+  document.getElementById('s2-nombre').value  = c.nombre    || '';
+  document.getElementById('s2-ruc').value     = c.codigo_sn || '';
+  document.getElementById('s2-ciudad').value  = c.ciudad    || '';
+  state.step2 = {...state.step2,
+    cliente_id:     c.id,
+    cliente_nombre: c.nombre    || '',
+    cliente_ruc:    c.codigo_sn || '',
+    ciudad:         c.ciudad    || ''
+  };
+  const buscarEl = document.getElementById('s2-buscar');
+  if (buscarEl) buscarEl.value = c.nombre || '';
+  document.getElementById('s2-suggest').style.display = 'none';
+  toast('Datos del cliente cargados','ok');
 }
 
 // Cargar cache al inicio del flujo empleado
@@ -6050,7 +6091,7 @@ function toggleNotifPanel(panelId) {
 // ══════════════════════════════════════════════════════════
 // MEJORA #3 — LÍMITE MÁXIMO DE PRÉSTAMOS SIMULTÁNEOS
 // ══════════════════════════════════════════════════════════
-const MAX_SOLICITUDES_ACTIVAS = 3; // Configurable
+const MAX_SOLICITUDES_ACTIVAS = 2; // Máximo 2 préstamos activos simultáneos
 
 async function validarLimitePrestamos() {
   if (!state.currentUser) return true; // sin sesión, no validar
@@ -6061,7 +6102,7 @@ async function validarLimitePrestamos() {
       .in('estado', ['pendiente_jefe','aprobado_jefe','verificando_stock','aprobado','activo']);
     if (error) throw error;
     if (count >= MAX_SOLICITUDES_ACTIVAS) {
-      toast(`Tienes ${count} solicitudes activas. Máximo permitido: ${MAX_SOLICITUDES_ACTIVAS}. Espera a que sean procesadas o devueltas.`, 'err');
+      toast(`Ya tienes ${count} solicitud${count>1?'es':''} activa${count>1?'s':''}. El máximo permitido es ${MAX_SOLICITUDES_ACTIVAS}. Espera a que sean completadas o devueltas antes de crear una nueva.`, 'err');
       return false;
     }
     return true;

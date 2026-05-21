@@ -2988,12 +2988,11 @@ function badgeHtml(estado) {
 async function initEmpleado() {
   showLoader(true);
   try {
-    // Usar RPC atómica para evitar race condition de folios duplicados
-    const { data: folio, error: folioErr } = await sb.rpc('generar_folio');
-    if (folioErr) throw folioErr;
-    state.folio = folio;
+    // El folio se genera en el momento del INSERT (enviarSolicitud),
+    // no al entrar al formulario, para evitar consumir números sin crear solicitud.
+    state.folio = null;
     state.solicitudEditando = null;
-    syncFolio();
+    syncFolio(); // muestra placeholder
     const hoy = new Date().toISOString().split('T')[0];
     const ret = new Date(Date.now()+3*864e5).toISOString().split('T')[0];
     document.getElementById('s1-fecha-prest').value = hoy;
@@ -3194,7 +3193,11 @@ async function enviarSolicitud() {
       if (e1) throw e1;
       await sb.from('solicitud_equipos').delete().eq('solicitud_id',state.solicitudEditando);
     } else {
-      // Incluir solicitante_user_id si viene de un usuario autenticado como solicitante
+      // Generar folio atómico justo antes del INSERT para no desperdiciar números
+      const { data: folioNuevo, error: folioErr } = await sb.rpc('generar_folio');
+      if (folioErr) throw folioErr;
+      state.folio = folioNuevo;
+      syncFolio();
       const insertPayload = {
         ...payload,
         folio: state.folio,
@@ -4456,6 +4459,13 @@ function abrirModalEntrega() {
 
 async function confirmarEntrega() {
   if (!currentSolData) return;
+  // Guard: no permitir duplicar ticket de entrega
+  if (currentSolData.estado === 'activo') {
+    toast('Esta solicitud ya fue entregada. No se puede registrar otra entrega.','err'); return;
+  }
+  if (currentSolData.estado !== 'aprobado') {
+    toast('Solo se puede registrar entrega en solicitudes aprobadas para entrega.','err'); return;
+  }
   const recibidoPor  = v('entrega-recibido-por');
   const recibidoDni  = v('entrega-recibido-dni');
   const entregadoPor = v('entrega-entregado-por');
@@ -4529,38 +4539,51 @@ async function confirmarEntrega() {
 
 async function confirmarDevolucion() {
   if (!currentSolData) return;
+  // Guard: solo se puede devolver desde estado activo
+  if (currentSolData.estado === 'devuelto') {
+    toast('Esta solicitud ya fue devuelta. No se puede registrar otra devolución.','err'); return;
+  }
+  if (currentSolData.estado !== 'activo') {
+    toast('Solo se puede registrar devolución de solicitudes activas (equipos entregados).','err'); return;
+  }
   const obs = v('dev-obs');
 
-  // MEJORA#4: Leer estado por equipo
+  // MEJORA#4: Leer estado y cantidad por equipo
   const estadosPorEquipo = [];
   document.querySelectorAll('.dev-eq-estado').forEach(sel => {
+    const eqId = sel.dataset.eqId;
+    const qtyEl = document.getElementById(`dev-qty-${eqId}`);
+    const qtyDev = qtyEl ? parseInt(qtyEl.value||0) : null;
     estadosPorEquipo.push({
-      inventario_id: sel.dataset.eqId,
+      inventario_id: eqId,
       nombre:        sel.dataset.eqNombre,
-      estado:        sel.value
+      estado:        sel.value,
+      cantidad_devuelta: qtyDev
     });
   });
 
-  // Estado global: si hay pérdidos → no_conforme; si hay dañados → parcial; si todo bien → conforme
+  // Estado global: perdido > dañado > sucio > conforme
   const hayPerdidos = estadosPorEquipo.some(e => e.estado === 'perdido');
   const hayDanados  = estadosPorEquipo.some(e => e.estado === 'danado');
-  const estadoEq    = hayPerdidos ? 'no_conforme' : hayDanados ? 'parcial' : 'conforme';
+  const haySucios   = estadosPorEquipo.some(e => e.estado === 'sucio');
+  const estadoEq    = hayPerdidos ? 'no_conforme' : hayDanados ? 'con_danios' : haySucios ? 'requiere_limpieza' : 'conforme';
   showLoader(true);
   try {
     // 1. Generar número de ticket devolución
     const { data: numTicket, error: etNum } = await sb.rpc('generar_numero_ticket', { p_tipo: 'devolucion' });
     if (etNum) throw etNum;
 
-    // 2. Snapshot de equipos con estado por ítem
+    // 2. Snapshot de equipos con estado y cantidad devuelta por ítem
     const equiposSnap = (currentSolData.equipos_detalle || [])
       .filter(e => e.disponible !== false)
       .map(e => {
         const eqId = e.inventario_id || e.id;
         const estadoItem = estadosPorEquipo.find(ep => ep.inventario_id === eqId);
         return {
-          nombre:    e.inventario?.nombre    || '—',
-          categoria: e.inventario?.categoria || '—',
-          cantidad:  e.cantidad || e.qty || 1,
+          nombre:           e.inventario?.nombre    || '—',
+          categoria:        e.inventario?.categoria || '—',
+          cantidad:         e.cantidad || e.qty || 1,
+          cantidad_devuelta: estadoItem?.cantidad_devuelta ?? (e.cantidad || e.qty || 1),
           estado_devolucion: estadoItem?.estado || 'conforme'
         };
       });
@@ -5306,16 +5329,6 @@ switchTab = function(tabId, btn) {
   _switchTabOrig2(tabId, btn);
   if (tabId==='tab-solic') loadSolicitantes();
 };
-
-
-function abrirModalDevolucion() {
-  const sol = currentSolData;
-  if (!sol) return;
-  document.getElementById('dev-obs').value = '';
-  const estEl = document.getElementById('dev-estado-equipos');
-  if (estEl) estEl.value = 'conforme';
-  openModal('modal-devolucion');
-}
 
 
 // ══════════════════════════════════════════════════════════
@@ -6103,33 +6116,55 @@ function abrirModalDevolucion() {
   if (!sol) return;
   const equipos = (sol.equipos_detalle||[]).filter(e => e.disponible !== false);
 
-  // Construir lista con estado por ítem
   const eqList = equipos.map(e => {
-    const eqId = e.inventario_id || e.id;
+    const eqId  = e.inventario_id || e.id;
     const nombre = e.inventario?.nombre || e.nombre || '—';
-    const qty = e.cantidad_aprobada || e.cantidad || 1;
+    const qtyEntregada = e.cantidad_aprobada || e.cantidad || 1;
     return `
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F0F0F0">
-      <div style="flex:1">
-        <div style="font-size:13px;color:#1A1A1A;font-weight:500">${nombre}</div>
-        <div style="font-size:11px;color:#666;font-family:var(--fm)">Cantidad entregada: ×${qty}</div>
+    <div style="border:1px solid #E8E8E8;border-radius:8px;padding:10px 12px;margin-bottom:8px;background:#FAFAFA">
+      <div style="font-size:13px;color:#1A1A1A;font-weight:500;margin-bottom:6px">${nombre}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center">
+        <div>
+          <div style="font-family:var(--fm);font-size:9px;color:#888;letter-spacing:1px;margin-bottom:3px">CANTIDAD A DEVOLVER</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button type="button" onclick="ajustarQtyDev('${eqId}',-1,${qtyEntregada})"
+              style="width:26px;height:26px;border:1px solid #DDD;border-radius:4px;background:#FFF;cursor:pointer;font-size:14px;line-height:1">−</button>
+            <input type="number" id="dev-qty-${eqId}" value="${qtyEntregada}" min="0" max="${qtyEntregada}"
+              data-max="${qtyEntregada}"
+              style="width:48px;text-align:center;border:1px solid #DDD;border-radius:4px;padding:3px;font-size:13px"
+              aria-label="Cantidad a devolver de ${nombre}"/>
+            <button type="button" onclick="ajustarQtyDev('${eqId}',1,${qtyEntregada})"
+              style="width:26px;height:26px;border:1px solid #DDD;border-radius:4px;background:#FFF;cursor:pointer;font-size:14px;line-height:1">+</button>
+            <span style="font-size:11px;color:#888">/ ${qtyEntregada}</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--fm);font-size:9px;color:#888;letter-spacing:1px;margin-bottom:3px">ESTADO DEL EQUIPO</div>
+          <select data-eq-id="${eqId}" data-eq-nombre="${nombre}" class="dev-eq-estado field-input"
+            style="width:100%;font-size:12px;padding:5px 8px" aria-label="Estado de ${nombre}">
+            <option value="conforme">✅ Conforme</option>
+            <option value="sucio">🧹 Sucio / Requiere limpieza</option>
+            <option value="danado">⚠️ Con daños</option>
+            <option value="perdido">❌ Perdido / No devuelve</option>
+          </select>
+        </div>
       </div>
-      <select data-eq-id="${eqId}" data-eq-nombre="${nombre}" class="dev-eq-estado field-input" style="width:160px;font-size:12px;padding:6px 10px" aria-label="Estado de ${nombre}">
-        <option value="conforme">✅ Conforme</option>
-        <option value="danado">⚠️ Con daños</option>
-        <option value="perdido">❌ Perdido / No devuelto</option>
-      </select>
     </div>`;
   }).join('');
 
   const devBody = document.getElementById('dev-equipos-detalle');
-  if (devBody) devBody.innerHTML = eqList || '<div style="color:#888;font-size:13px">Sin equipos registrados</div>';
+  if (devBody) devBody.innerHTML = eqList || '<div style="color:#888;font-size:13px;padding:12px 0">Sin equipos registrados</div>';
 
   document.getElementById('dev-obs').value = '';
-  const globalEstEl = document.getElementById('dev-estado-equipos');
-  if (globalEstEl) globalEstEl.value = 'conforme';
-
   openModal('modal-devolucion');
+}
+
+function ajustarQtyDev(eqId, delta, maxQty) {
+  const el = document.getElementById(`dev-qty-${eqId}`);
+  if (!el) return;
+  let val = parseInt(el.value||0) + delta;
+  val = Math.max(0, Math.min(maxQty, val));
+  el.value = val;
 }
 
 </script>

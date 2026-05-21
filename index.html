@@ -3554,41 +3554,26 @@ async function admCrearNuevaSolicitud() {
   // Recordar pantalla de origen para el botón volver
   lastActiveScreen = 'screen-almacen';
 
-  // Reset completo del estado
+  // Reset de estado antes de initEmpleado
   state.carrito = [];
   state.step1 = {};
   state.step2 = {};
   state.solicitudEditando = null;
   state.solicitudGuardada = null;
 
-  // Limpiar campos del paso 1 (IDs reales del HTML)
-  ['s1-nombre','s1-licencia','s1-cond-nombre','s1-cond-dni'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  const dniEl = document.getElementById('s1-dni'); if (dniEl) dniEl.value = '';
-  ['s1-cargo','s1-area'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.selectedIndex = 0;
-  });
-  ['s1-fecha-prest','s1-fecha-ret'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  const condExtra = document.getElementById('s1-cond-distinto');
-  if (condExtra) { condExtra.checked = false; }
-  if (typeof toggleConductorExtra === 'function') toggleConductorExtra();
+  // initEmpleado genera el folio atómico, carga inventario,
+  // carga solicitantesCache (autocompletado) y navega a screen-step1
+  await initEmpleado();
 
   // Limpiar campos del paso 2
   ['s2-nombre','s2-ruc','s2-ciudad','s2-dir','s2-proyecto'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
 
-  // Renderizar carrito vacío
-  if (typeof renderCart === 'function') renderCart();
-
-  // Generar nuevo folio y sincronizarlo
-  if (typeof syncFolio === 'function') setTimeout(syncFolio, 100);
-
-  // Ir al paso 1
-  showScreen('screen-step1');
+  // Limpiar conductor extra
+  const condExtra = document.getElementById('s1-cond-distinto');
+  if (condExtra) { condExtra.checked = false; }
+  if (typeof toggleConductorExtra === 'function') toggleConductorExtra();
 }
 
 async function loadSolicitudes() {

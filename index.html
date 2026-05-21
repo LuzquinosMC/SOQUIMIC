@@ -5007,66 +5007,51 @@ async function abrirModalJefe(s) {
     .eq('solicitud_id', s.id);
   s.equipos_detalle = eqs||[];
 
-  // Llenar datos
-  document.getElementById('jefe-sol-folio').textContent    = s.folio;
-  document.getElementById('jefe-nombre').textContent       = s.solicitante_nombre||'—';
-  document.getElementById('jefe-dni').textContent          = s.solicitante_dni||'—';
-  document.getElementById('jefe-cargo-area').textContent   = `${s.solicitante_cargo||'—'} · ${s.solicitante_area||'—'}`;
-  document.getElementById('jefe-cliente').textContent      = `${s.cliente_nombre||'—'}${s.proyecto_obra?' · '+s.proyecto_obra:''}`;
-  document.getElementById('jefe-fprest').textContent       = fmtDate(s.fecha_prestamo);
-  document.getElementById('jefe-fret').textContent         = fmtDate(s.fecha_retorno);
-  document.getElementById('jefe-obs-input').value          = s.obs_jefe||'';
+  // Llenar datos — IDs del nuevo modal-jefe-sol
+  document.getElementById('jefe-sol-folio').textContent = s.folio;
+  document.getElementById('jefe-nombre').textContent    = `${s.solicitante_nombre||'—'} · ${s.solicitante_cargo||'—'} · ${s.solicitante_area||'—'}`;
+  document.getElementById('jefe-dni').textContent       = s.solicitante_dni||'—';
+  const obsEl = document.getElementById('jefe-obs');
+  if (obsEl) obsEl.value = s.obs_jefe||'';
 
-  // Equipos lista
+  // Equipos
   const equiposEl = document.getElementById('jefe-equipos-lista');
-  if (!eqs||!eqs.length) {
-    equiposEl.innerHTML = '<div style="font-size:13px;color:var(--text-dim)">Sin equipos registrados</div>';
-  } else {
-    equiposEl.innerHTML = eqs.map(e => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
-        <div>
-          <div style="font-size:13px;color:var(--text-dark);font-weight:500">${e.inventario?.nombre||'—'}</div>
-          <div style="font-family:var(--fm);font-size:10px;color:var(--text-dim)">${e.inventario?.categoria||''}</div>
-        </div>
-        <span style="font-family:var(--fm);color:var(--orange);font-size:14px;font-weight:600">×${e.cantidad}</span>
-      </div>`).join('');
+  if (equiposEl) {
+    if (!eqs||!eqs.length) {
+      equiposEl.innerHTML = '<div style="font-size:13px;color:var(--text-dim)">Sin equipos registrados</div>';
+    } else {
+      equiposEl.innerHTML = eqs.map(e => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div>
+            <div style="font-size:13px;color:var(--text-dark);font-weight:500">${e.inventario?.nombre||'—'}</div>
+            <div style="font-family:var(--fm);font-size:10px;color:var(--text-dim)">${e.inventario?.categoria||''}</div>
+          </div>
+          <span style="font-family:var(--fm);color:var(--orange);font-size:14px;font-weight:600">×${e.cantidad}</span>
+        </div>`).join('');
+    }
   }
 
-  // Historial
-  const {data:hist} = await sb.from('historial_estados')
-    .select('*').eq('solicitud_id',s.id).order('created_at',{ascending:true});
-  const histEl = document.getElementById('jefe-historial');
-  if (!hist||!hist.length) {
-    histEl.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:10px">Sin historial</div>';
-  } else {
-    histEl.innerHTML = hist.map(h=>`
-      <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
-        <div style="width:7px;height:7px;border-radius:50%;background:var(--orange);flex-shrink:0;margin-top:4px"></div>
-        <div>
-          <div style="font-size:11px;color:var(--text-dark)"><strong>${h.estado_anterior||'—'}</strong> → <strong style="color:var(--orange)">${h.estado_nuevo}</strong></div>
-          <div style="font-size:10px;color:var(--text-dim)">${h.cambiado_por} · ${new Date(h.created_at).toLocaleString('es-PE')}</div>
-          ${h.observacion?`<div style="font-size:10px;color:var(--text-dim);font-style:italic">${h.observacion}</div>`:''}
-        </div>
-      </div>`).join('');
+  // Acciones según estado
+  const accionesEl = document.getElementById('jefe-acciones');
+  if (accionesEl) {
+    if (s.estado === 'pendiente_jefe' && puedeHacer('aprobar_jefe')) {
+      accionesEl.innerHTML = `
+        <button class="btn btn-red"   style="font-size:11px" onclick="decisionJefe('rechazar')">[CANCEL] Rechazar</button>
+        <button class="btn btn-ghost" style="font-size:11px" onclick="decisionJefe('observar')">Observar</button>
+        <button class="btn btn-green" style="font-size:11px" onclick="decisionJefe('aprobar')">[OK] Aprobar</button>`;
+    } else {
+      accionesEl.innerHTML = `<div style="font-size:13px;color:var(--text-dim)">Estado actual: ${badgeHtml(s.estado)}</div>`;
+    }
   }
 
-  // Botones de acción según estado
-  const btnsEl = document.getElementById('jefe-acciones-btns');
-  if (s.estado === 'pendiente_jefe') {
-    btnsEl.innerHTML = `
-      <button class="btn btn-red"   style="font-size:11px" onclick="decisionJefe('rechazar')">[CANCEL] Rechazar</button>
-      <button class="btn btn-ghost" style="font-size:11px" onclick="decisionJefe('observar')">Observar / Pedir corrección</button>
-      <button class="btn btn-green" style="font-size:11px" onclick="decisionJefe('aprobar')">[OK] Aprobar</button>`;
-  } else {
-    btnsEl.innerHTML = `<div style="font-size:13px;color:var(--text-dim)">Esta solicitud ya fue procesada: <strong>${badgeHtml(s.estado)}</strong></div>`;
-  }
+  openModal('modal-jefe-sol');
 
   openModal('modal-jefe-sol');
 }
 
 async function decisionJefe(accion) {
   if (!currentJefeSol) return;
-  const obs = document.getElementById('jefe-obs-input').value.trim();
+  const obs = document.getElementById('jefe-obs')?.value?.trim() || '';
 
   if (accion==='observar' && !obs) {
     toast('Escribe la observación o corrección requerida','err'); return;
@@ -6400,6 +6385,9 @@ function ajustarQtyDev(eqId, delta, maxQty) {
     </div>
   </div>
 
+  <!-- Aviso readonly para asistente_comercial / comercial -->
+  <div id="com-aviso-readonly" style="display:none;padding:0 24px 0"></div>
+
   <!-- Stats solo de lo que compete al área comercial -->
   <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
     <div class="stat-card">
@@ -6612,11 +6600,36 @@ function ajustarQtyDev(eqId, delta, maxQty) {
   <div role="dialog" aria-modal="true" class="modal modal-wide">
     <div class="panel-header" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
       <div class="ph-bar" style="background:var(--green)"></div>
-      <div class="panel-title" id="jefe-sol-folio-2" style="color:var(--green);letter-spacing:2px">—</div>
+      <div>
+        <div class="panel-title" id="jefe-sol-folio" style="color:var(--green);letter-spacing:2px">—</div>
+        <div id="jefe-sol-folio-2" style="display:none">—</div>
+      </div>
     </div>
-    <div style="text-align:center;padding:20px 0;color:var(--text-muted);font-size:13px">
-      Usa el Panel Comercial para revisar esta solicitud.<br>
-      <button class="btn btn-orange" style="margin-top:16px" onclick="closeModal('modal-jefe-sol')">Cerrar</button>
+    <!-- Datos del solicitante -->
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
+      <div>
+        <div style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:3px">SOLICITANTE</div>
+        <div id="jefe-nombre" style="color:var(--text-dark);font-weight:500">—</div>
+      </div>
+      <div>
+        <div style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:3px">DNI</div>
+        <div id="jefe-dni" style="color:var(--text-dark);font-family:var(--fm)">—</div>
+      </div>
+    </div>
+    <!-- Equipos -->
+    <div style="margin-bottom:16px">
+      <div style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:8px">EQUIPOS SOLICITADOS</div>
+      <div id="jefe-equipos-lista"></div>
+    </div>
+    <!-- Observación -->
+    <div style="margin-bottom:16px">
+      <div style="font-family:var(--fm);font-size:9px;color:var(--text-dim);letter-spacing:1.5px;margin-bottom:6px">OBSERVACIÓN (opcional)</div>
+      <textarea id="jefe-obs" class="field-input" placeholder="Motivo de observación o rechazo..." style="height:72px;resize:vertical;font-size:13px"></textarea>
+    </div>
+    <!-- Acciones -->
+    <div id="jefe-acciones" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
+    <div style="display:flex;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal('modal-jefe-sol')">Cerrar</button>
     </div>
   </div>
 </div>
